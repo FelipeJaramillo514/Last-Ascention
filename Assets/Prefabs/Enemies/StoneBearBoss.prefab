@@ -1,0 +1,149 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &8397346020657630531
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 296671254078847899, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_Color.b
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 296671254078847899, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_Color.g
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 296671254078847899, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_Color.r
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 296671254078847899, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 314351707457168800, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1699448244683122699, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_Size.x
+      value: 1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1699448244683122699, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_Size.y
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4430153174413966355, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      propertyPath: m_Name
+      value: StoneBearBoss
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 8625382847077496566, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4430153174413966355, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1392976273148535378}
+  m_SourcePrefab: {fileID: 100100000, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+--- !u!1 &5328406392113328464 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4430153174413966355, guid: 266a9b04cc7541946ad2e951eb8fe850, type: 3}
+  m_PrefabInstance: {fileID: 8397346020657630531}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1392976273148535378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5328406392113328464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6a83806885cb324fb7af7b1c9d9f48f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StoneBearBoss
+  data: {fileID: 11400000, guid: 9be22115e9c55e74ca631a93ee370bdf, type: 2}
+  patrolWaypoints:
+  - {x: -1.5, y: 0}
+  - {x: 1.5, y: 0}
+  idleDuration: 2
+  detectionInterval: 0.3
+  staggerDuration: 0.2
+  staggerFlashDuration: 0.1
+  staggerKnockbackForce: 6
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  phase2HPThreshold: 0.5
+  deathDespawnDelay: 3
+  phase1MoveSpeed: 2.5
+  phase2MoveSpeed: 3.5
+  chargeWindup: 2
+  chargeSpeed: 10
+  chargeDuration: 1.5
+  chargePlayerDamage: 30
+  wallStaggerDuration: 1.5
+  swipeWindup: 0.8
+  swipeRadius: 2.5
+  swipeDamage: 50
+  swipeKnockback: 5
+  swipeOffset: 1.4
+  groundSlamWindup: 1.5
+  groundSlamRadius: 5
+  groundSlamDamage: 40
+  groundSlamMinCooldown: 30
+  projectilePrefab: {fileID: 6598520209562193003, guid: 286492aaf09285e45af6b9984663afbb, type: 3}
+  projectilePoolKey: EnemyProjectile
+  projectileSpawnOffset: 1
+  fragmentDamage: 18
+  spinProjectileDamage: 14
+  spinCooldown: 20
+  spinDuration: 2

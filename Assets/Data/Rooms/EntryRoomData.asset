@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cee9ee8fd85f7c43ae5df00db33fd25, type: 3}
+  m_Name: EntryRoomData
+  m_EditorClassIdentifier: Assembly-CSharp::RoomData
+  roomType: 0
+  minSize: {x: 20, y: 15}
+  maxSize: {x: 20, y: 15}
+  enemySpawnTable: []
+  canHaveAmbush: 0
+  possiblePropPrefabs:
+  - {fileID: 6411983011043908742, guid: 4523a064045b88d44927b04b43e74ddc, type: 3}
