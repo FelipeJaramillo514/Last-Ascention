@@ -219,6 +219,7 @@ public class WeaponHudUI : MonoBehaviour
     {
         if (overlayCanvas != null && activePanel != null && activeIcon != null && activeNameText != null && ammoFill != null && ammoText != null && secondaryPanel != null && secondaryIcon != null && secondaryNameText != null && dodgeIcon != null && dodgeCooldownFill != null)
         {
+            ApplyStaticStyle();
             return;
         }
 
@@ -314,6 +315,191 @@ public class WeaponHudUI : MonoBehaviour
         secondaryNameText = EnsureText(secondaryPanel, "SecondaryName", 14, TextAnchor.MiddleLeft, new Color(1f, 1f, 1f, 0.78f), new Vector2(48f, 0f), new Vector2(170f, 20f));
         secondaryHintText = EnsureText(secondaryPanel, "Hint", 12, TextAnchor.MiddleRight, new Color(0.48f, 0.9f, 1f, 1f), new Vector2(240f, 0f), new Vector2(48f, 20f));
         secondaryHintText.text = "[Q]";
+        ApplyStaticStyle();
+    }
+
+    private void ApplyStaticStyle()
+    {
+        if (activePanel != null)
+        {
+            activePanel.anchorMin = new Vector2(0f, 1f);
+            activePanel.anchorMax = new Vector2(0f, 1f);
+            activePanel.pivot = new Vector2(0f, 1f);
+            activePanel.anchoredPosition = new Vector2(16f, -158f);
+            activePanel.sizeDelta = new Vector2(342f, 82f);
+            ApplyPanelVisual(activePanel, new Color(0.012f, 0.018f, 0.028f, 0.92f));
+        }
+
+        if (secondaryPanel != null)
+        {
+            secondaryPanel.anchorMin = new Vector2(0f, 1f);
+            secondaryPanel.anchorMax = new Vector2(0f, 1f);
+            secondaryPanel.pivot = new Vector2(0f, 1f);
+            secondaryPanel.anchoredPosition = new Vector2(16f, -248f);
+            secondaryPanel.sizeDelta = new Vector2(304f, 44f);
+            ApplyPanelVisual(secondaryPanel, new Color(0.01f, 0.014f, 0.022f, 0.86f));
+        }
+
+        Image activeAccent = activePanel != null ? activePanel.Find("PowerAccent")?.GetComponent<Image>() : null;
+        if (activeAccent != null)
+        {
+            activeAccent.sprite = HUDSpriteFactory.WhiteSprite;
+            activeAccent.color = new Color(0.82f, 0.28f, 1f, 0.9f);
+            activeAccent.raycastTarget = false;
+        }
+
+        Text activeLabel = activePanel != null ? activePanel.Find("Label")?.GetComponent<Text>() : null;
+        if (activeLabel != null)
+        {
+            activeLabel.text = "ARMA ACTIVA";
+            activeLabel.color = new Color(0.62f, 0.95f, 1f, 0.9f);
+            activeLabel.raycastTarget = false;
+        }
+
+        if (activeIcon != null)
+        {
+            RectTransform activeIconRect = activeIcon.rectTransform;
+            activeIconRect.anchorMin = new Vector2(0f, 0.5f);
+            activeIconRect.anchorMax = new Vector2(0f, 0.5f);
+            activeIconRect.pivot = new Vector2(0f, 0.5f);
+            activeIconRect.anchoredPosition = new Vector2(16f, 0f);
+            activeIconRect.sizeDelta = new Vector2(48f, 48f);
+            activeIcon.color = Color.white;
+            activeIcon.preserveAspect = true;
+            activeIcon.raycastTarget = false;
+        }
+
+        if (activeNameText != null)
+        {
+            activeNameText.color = Color.white;
+            activeNameText.raycastTarget = false;
+        }
+
+        RectTransform ammoRoot = ammoFill != null ? ammoFill.transform.parent as RectTransform : null;
+        if (ammoRoot != null)
+        {
+            ammoRoot.anchoredPosition = new Vector2(76f, -19f);
+            ammoRoot.sizeDelta = new Vector2(162f, 14f);
+            Image ammoBackground = ammoRoot.GetComponent<Image>();
+            if (ammoBackground != null)
+            {
+                ammoBackground.sprite = HUDSpriteFactory.WhiteSprite;
+                ammoBackground.color = new Color(0.025f, 0.025f, 0.035f, 0.96f);
+                ammoBackground.raycastTarget = false;
+            }
+        }
+
+        if (ammoFill != null)
+        {
+            RectTransform ammoFillRect = ammoFill.rectTransform;
+            ammoFillRect.anchorMin = Vector2.zero;
+            ammoFillRect.anchorMax = Vector2.one;
+            ammoFillRect.pivot = new Vector2(0.5f, 0.5f);
+            ammoFillRect.anchoredPosition = Vector2.zero;
+            ammoFillRect.sizeDelta = Vector2.zero;
+            ammoFill.sprite = HUDSpriteFactory.WhiteSprite;
+            ammoFill.type = Image.Type.Filled;
+            ammoFill.fillMethod = Image.FillMethod.Horizontal;
+            ammoFill.fillOrigin = 0;
+            ammoFill.color = new Color(0f, 0.82f, 1f, 0.82f);
+            ammoFill.raycastTarget = false;
+        }
+
+        if (ammoText != null)
+        {
+            ammoText.color = Color.white;
+            ammoText.raycastTarget = false;
+        }
+
+        RectTransform dodgeRoot = dodgeCooldownFill != null ? dodgeCooldownFill.transform.parent as RectTransform : null;
+        if (dodgeRoot != null)
+        {
+            dodgeRoot.anchoredPosition = new Vector2(304f, 0f);
+            dodgeRoot.sizeDelta = new Vector2(38f, 38f);
+            Image dodgeBorder = dodgeRoot.GetComponent<Image>();
+            if (dodgeBorder != null)
+            {
+                dodgeBorder.sprite = HUDSpriteFactory.WhiteSprite;
+                dodgeBorder.color = new Color(0f, 0.76f, 1f, 0.1f);
+                dodgeBorder.raycastTarget = false;
+            }
+        }
+
+        if (dodgeCooldownFill != null)
+        {
+            RectTransform dodgeFillRect = dodgeCooldownFill.rectTransform;
+            dodgeFillRect.anchorMin = Vector2.zero;
+            dodgeFillRect.anchorMax = Vector2.one;
+            dodgeFillRect.pivot = new Vector2(0.5f, 0.5f);
+            dodgeFillRect.anchoredPosition = Vector2.zero;
+            dodgeFillRect.sizeDelta = Vector2.zero;
+            dodgeCooldownFill.sprite = HUDSpriteFactory.WhiteSprite;
+            dodgeCooldownFill.type = Image.Type.Filled;
+            dodgeCooldownFill.fillMethod = Image.FillMethod.Radial360;
+            dodgeCooldownFill.fillClockwise = false;
+            dodgeCooldownFill.color = new Color(0f, 0.86f, 1f, 0.45f);
+            dodgeCooldownFill.raycastTarget = false;
+        }
+
+        if (dodgeIcon != null)
+        {
+            RectTransform dodgeIconRect = dodgeIcon.rectTransform;
+            dodgeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+            dodgeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+            dodgeIconRect.pivot = new Vector2(0.5f, 0.5f);
+            dodgeIconRect.anchoredPosition = Vector2.zero;
+            dodgeIconRect.sizeDelta = new Vector2(20f, 20f);
+            dodgeIcon.color = Color.white;
+            dodgeIcon.preserveAspect = true;
+            dodgeIcon.raycastTarget = false;
+        }
+
+        if (secondaryIcon != null)
+        {
+            RectTransform secondaryIconRect = secondaryIcon.rectTransform;
+            secondaryIconRect.anchorMin = new Vector2(0f, 0.5f);
+            secondaryIconRect.anchorMax = new Vector2(0f, 0.5f);
+            secondaryIconRect.pivot = new Vector2(0f, 0.5f);
+            secondaryIconRect.anchoredPosition = new Vector2(12f, 0f);
+            secondaryIconRect.sizeDelta = new Vector2(28f, 28f);
+            secondaryIcon.color = new Color(1f, 1f, 1f, 0.82f);
+            secondaryIcon.preserveAspect = true;
+            secondaryIcon.raycastTarget = false;
+        }
+
+        if (secondaryNameText != null)
+        {
+            secondaryNameText.color = new Color(1f, 1f, 1f, 0.78f);
+            secondaryNameText.raycastTarget = false;
+        }
+
+        if (secondaryHintText != null)
+        {
+            secondaryHintText.color = new Color(0.48f, 0.9f, 1f, 1f);
+            secondaryHintText.raycastTarget = false;
+        }
+    }
+
+    private void ApplyPanelVisual(RectTransform panel, Color color)
+    {
+        Image image = panel.GetComponent<Image>();
+        if (image == null)
+        {
+            image = panel.gameObject.AddComponent<Image>();
+        }
+
+        image.sprite = HUDSpriteFactory.WhiteSprite;
+        image.color = color;
+        image.raycastTarget = false;
+
+        Outline outline = panel.GetComponent<Outline>();
+        if (outline == null)
+        {
+            outline = panel.gameObject.AddComponent<Outline>();
+        }
+
+        outline.effectColor = new Color(0f, 0.85f, 1f, 0.62f);
+        outline.effectDistance = new Vector2(1f, -1f);
     }
 
     private AudioClip CreateEmptyClickClip()
@@ -425,10 +611,8 @@ public class WeaponHudUI : MonoBehaviour
         rect.anchorMax = anchorMax;
         rect.pivot = pivot;
         rect.anchoredPosition = anchoredPosition;
-        if (sizeDelta != Vector2.zero)
-        {
-            rect.sizeDelta = sizeDelta;
-        }
+        rect.sizeDelta = sizeDelta;
+        image.raycastTarget = false;
         return image;
     }
 

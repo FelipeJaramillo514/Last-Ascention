@@ -309,10 +309,8 @@ public class MissionPanelUI : MonoBehaviour
         rect.anchorMax = anchorMax;
         rect.pivot = pivot;
         rect.anchoredPosition = anchoredPosition;
-        if (sizeDelta != Vector2.zero)
-        {
-            rect.sizeDelta = sizeDelta;
-        }
+        rect.sizeDelta = sizeDelta;
+        image.raycastTarget = false;
         return image;
     }
 
