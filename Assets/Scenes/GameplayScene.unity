@@ -248,6 +248,7 @@ GameObject:
   - component: {fileID: 1123684089}
   - component: {fileID: 1123684088}
   - component: {fileID: 1123684087}
+  - component: {fileID: 1123684094}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -265,7 +266,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6ef35a6233c3fe442801982df5f093bb, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponManager
   equippedWeapons:
   - {fileID: 0}
@@ -275,6 +276,7 @@ MonoBehaviour:
   weaponPickupPrefab: {fileID: 729380055520242913, guid: 9c73ea666f94be5468a4a5b7c186c53f, type: 3}
   weaponMount: {fileID: 0}
   weaponRuntime: {fileID: 0}
+  showEquippedWeaponSprite: 0
 --- !u!114 &1123684088
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,6 +334,7 @@ MonoBehaviour:
   mainCamera: {fileID: 2011769010}
   playerHealth: {fileID: 0}
   weaponManager: {fileID: 1123684087}
+  knifeAuraAttack: {fileID: 0}
   stats:
     systemLevel: 1
     strength: 5
@@ -364,6 +367,9 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
+  attackAnimationVariantCount: 7
+  hitAnimationDuration: 0.35
+  deathAnimationDuration: 0.55
 --- !u!70 &1123684091
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -445,6 +451,35 @@ Transform:
   - {fileID: 2011769015}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1123684094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1123684086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81d6fc497135c1b4d8fa71b3b38beb8e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::KnifeAuraAttack
+  cooldown: 0.32
+  damageMultiplier: 1.15
+  damageBonus: 3
+  projectileSpeed: 10
+  projectileRange: 7.5
+  maxPierceTargets: 2
+  projectileColliderRadius: 0.22
+  spawnDistance: 0.65
+  spawnHeightOffset: 0.12
+  trailDistance: 0.28
+  trailScale: 1.05
+  attackAnimationDuration: 0.24
+  projectileFrameRate: 14
+  effectFrameRate: 18
+  projectileFrames: []
+  impactFrames: []
+  trailFrames: []
 --- !u!1 &1407560955
 GameObject:
   m_ObjectHideFlags: 0
@@ -1019,8 +1054,8 @@ Camera:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1.0004548
-    height: 0.99946266
+    width: 0.7276035
+    height: 0.87431693
   near clip plane: 0.1
   far clip plane: 100
   field of view: 40

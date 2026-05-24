@@ -13,6 +13,13 @@ public enum AssociationMissionMetric
     DefeatBoss
 }
 
+public enum ScenarioId
+{
+    CityOfArken,
+    CursedDungeon,
+    AbyssSanctuary
+}
+
 [Serializable]
 public class AssociationMissionOffer
 {
@@ -79,6 +86,7 @@ public class RunManager : MonoBehaviour
     private static RunManager instance;
 
     [SerializeField] private RunSummaryUI runSummaryUI;
+    [SerializeField] private ScenarioId selectedScenario = ScenarioId.CursedDungeon;
 
     private readonly List<AssociationMissionOffer> currentAssociationMissions = new List<AssociationMissionOffer>();
 
@@ -103,6 +111,7 @@ public class RunManager : MonoBehaviour
     public RunStats CurrentRunStats => currentRunStats;
     public bool IsRunActive => runActive;
     public int CurrentFloorNumber => 1;
+    public ScenarioId SelectedScenario => selectedScenario;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Bootstrap()
@@ -161,6 +170,17 @@ public class RunManager : MonoBehaviour
     public bool ShouldManageDungeonBuild(string sceneName)
     {
         return runActive && sceneName == DungeonSceneName;
+    }
+
+    public void SelectScenario(ScenarioId scenarioId)
+    {
+        selectedScenario = scenarioId;
+    }
+
+    public void StartRun(ScenarioId scenarioId)
+    {
+        SelectScenario(scenarioId);
+        StartRun();
     }
 
     public void StartRun()

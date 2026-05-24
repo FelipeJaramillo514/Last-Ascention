@@ -64,13 +64,15 @@ public class WeaponHudUI : MonoBehaviour
             lastActiveSlot = activeSlot;
         }
 
-        activeIcon.enabled = activeWeapon != null && activeWeapon.weaponIcon != null;
-        activeIcon.sprite = activeWeapon != null ? activeWeapon.weaponIcon : null;
+        Sprite activeWeaponIcon = WeaponVisualResolver.GetWeaponIcon(activeWeapon);
+        activeIcon.enabled = activeWeaponIcon != null;
+        activeIcon.sprite = activeWeaponIcon;
         activeNameText.text = activeWeapon != null ? activeWeapon.weaponName : "Sin arma";
         UpdateAmmoDisplay(activeWeapon, activeAmmo);
 
-        secondaryIcon.enabled = secondaryWeapon != null && secondaryWeapon.weaponIcon != null;
-        secondaryIcon.sprite = secondaryWeapon != null ? secondaryWeapon.weaponIcon : null;
+        Sprite secondaryWeaponIcon = WeaponVisualResolver.GetWeaponIcon(secondaryWeapon);
+        secondaryIcon.enabled = secondaryWeaponIcon != null;
+        secondaryIcon.sprite = secondaryWeaponIcon;
         secondaryPanel.gameObject.SetActive(secondaryWeapon != null);
         secondaryNameText.text = secondaryWeapon != null ? secondaryWeapon.weaponName : "Slot vacio";
 

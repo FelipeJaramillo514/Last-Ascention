@@ -8,6 +8,7 @@ public class DoorTrigger : MonoBehaviour
     [SerializeField] private int sourceDoorIndex;
     [SerializeField] private int destinationDoorIndex;
     [SerializeField] private float reentryCooldown = 0.25f;
+    [SerializeField] private bool traversalEnabled = true;
 
     private float nextAllowedTriggerTime;
 
@@ -15,6 +16,7 @@ public class DoorTrigger : MonoBehaviour
     public DungeonRoom DestinationRoom { get { return destinationRoom; } }
     public int SourceDoorIndex { get { return sourceDoorIndex; } }
     public int DestinationDoorIndex { get { return destinationDoorIndex; } }
+    public bool TraversalEnabled { get { return traversalEnabled; } }
 
     private void Awake()
     {
@@ -30,8 +32,23 @@ public class DoorTrigger : MonoBehaviour
         destinationDoorIndex = destinationIndex;
     }
 
+    public void SetTraversalEnabled(bool enabled)
+    {
+        traversalEnabled = enabled;
+        BoxCollider2D triggerCollider = GetComponent<BoxCollider2D>();
+        if (triggerCollider != null)
+        {
+            triggerCollider.enabled = enabled;
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (!traversalEnabled)
+        {
+            return;
+        }
+
         if (Time.time < nextAllowedTriggerTime)
         {
             return;
@@ -44,6 +61,12 @@ public class DoorTrigger : MonoBehaviour
 
         if (DungeonBuilder.Instance == null)
         {
+            return;
+        }
+
+        if (sourceRoom != null && sourceRoom.IsCombatLocked)
+        {
+            nextAllowedTriggerTime = Time.time + reentryCooldown;
             return;
         }
 

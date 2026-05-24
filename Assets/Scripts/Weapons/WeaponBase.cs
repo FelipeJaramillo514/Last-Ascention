@@ -79,7 +79,7 @@ public class WeaponBase : MonoBehaviour
         currentAmmo = ammoOverride != int.MinValue ? ammoOverride : GetInitialAmmo();
         if (weaponRenderer != null)
         {
-            Sprite weaponSprite = data.weaponIcon;
+            Sprite weaponSprite = WeaponVisualResolver.GetWeaponIcon(data);
             if (weaponSprite == null && data.animationFrames != null && data.animationFrames.Length > 0)
             {
                 weaponSprite = data.animationFrames[0];

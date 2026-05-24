@@ -15,6 +15,8 @@ public class KaisenController : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private WeaponManager weaponManager;
+    [SerializeField] private KnifeAuraAttack knifeAuraAttack;
+    [SerializeField] private OrangeFireAbility orangeFireAbility;
 
     [Header("Stats")]
     [SerializeField] private KaisenStats stats = new KaisenStats();
@@ -40,6 +42,8 @@ public class KaisenController : MonoBehaviour
     [SerializeField] private int attackAnimationVariantCount = 7;
     [SerializeField] private float hitAnimationDuration = 0.35f;
     [SerializeField] private float deathAnimationDuration = 0.55f;
+    [SerializeField] private bool rotateVisualToAim;
+    [SerializeField] private bool flipVisualToAim = true;
 
     private Vector2 moveInput;
     private Vector2 dodgeDirection = Vector2.down;
@@ -117,6 +121,21 @@ public class KaisenController : MonoBehaviour
         if (weaponManager == null)
         {
             weaponManager = GetComponent<WeaponManager>();
+        }
+
+        if (knifeAuraAttack == null)
+        {
+            knifeAuraAttack = GetComponent<KnifeAuraAttack>();
+        }
+
+        if (orangeFireAbility == null)
+        {
+            orangeFireAbility = GetComponent<OrangeFireAbility>();
+        }
+
+        if (orangeFireAbility == null)
+        {
+            orangeFireAbility = gameObject.AddComponent<OrangeFireAbility>();
         }
 
         ConfigurePhysicsBody();
@@ -288,8 +307,20 @@ public class KaisenController : MonoBehaviour
 
         if (visualPivot != null)
         {
-            float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
-            visualPivot.rotation = Quaternion.Euler(0f, 0f, angle);
+            if (rotateVisualToAim)
+            {
+                float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
+                visualPivot.rotation = Quaternion.Euler(0f, 0f, angle);
+            }
+            else
+            {
+                visualPivot.localRotation = Quaternion.identity;
+            }
+        }
+
+        if (flipVisualToAim && spriteRenderer != null && Mathf.Abs(aimDirection.x) > 0.08f)
+        {
+            spriteRenderer.flipX = aimDirection.x < 0f;
         }
     }
 
@@ -306,14 +337,34 @@ public class KaisenController : MonoBehaviour
         bool attackPressed = (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
             || (Gamepad.current != null && Gamepad.current.buttonWest.wasPressedThisFrame);
 
+        bool orangePowerPressed = (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+            || (Gamepad.current != null && Gamepad.current.rightTrigger.wasPressedThisFrame);
+
         if (dodgePressed)
         {
             TryStartDodge();
         }
 
-        if (attackPressed && weaponManager != null)
+        if (orangePowerPressed && orangeFireAbility != null)
         {
-            weaponManager.TryFireActiveWeapon(aimDirection);
+            if (orangeFireAbility.TryFire(aimDirection))
+            {
+                return;
+            }
+        }
+
+        if (attackPressed)
+        {
+            if (weaponManager != null && weaponManager.TryFireActiveWeapon(aimDirection))
+            {
+                return;
+            }
+
+            if (knifeAuraAttack != null)
+            {
+                knifeAuraAttack.TryFire(aimDirection);
+                return;
+            }
         }
     }
 
@@ -547,6 +598,8 @@ public class KaisenController : MonoBehaviour
         mainCamera = Camera.main;
         playerHealth = GetComponent<PlayerHealth>();
         weaponManager = GetComponent<WeaponManager>();
+        knifeAuraAttack = GetComponent<KnifeAuraAttack>();
+        orangeFireAbility = GetComponent<OrangeFireAbility>();
         enemyLayer = LayerMask.GetMask("Enemy");
         ConfigurePhysicsBody();
     }

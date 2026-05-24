@@ -52,6 +52,7 @@ public class WeaponPickup : MonoBehaviour
     {
         weaponData = data;
         ammoOverride = ammo;
+        basePosition = transform.position;
         RefreshVisual();
     }
 
@@ -104,9 +105,7 @@ public class WeaponPickup : MonoBehaviour
             return;
         }
 
-        spriteRenderer.sprite = weaponData != null ? weaponData.weaponIcon : null;
+        spriteRenderer.sprite = WeaponVisualResolver.GetWeaponIcon(weaponData);
         spriteRenderer.enabled = spriteRenderer.sprite != null;
     }
 }
-
-

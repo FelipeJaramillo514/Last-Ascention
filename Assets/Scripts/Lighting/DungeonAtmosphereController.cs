@@ -157,8 +157,8 @@ public class DungeonAtmosphereController : MonoBehaviour
         }
 
         globalLight.lightType = Light2D.LightType.Global;
-        globalLight.color = new Color32(10, 10, 18, 255);
-        globalLight.intensity = 0.15f;
+        globalLight.color = new Color32(62, 66, 86, 255);
+        globalLight.intensity = 0.64f;
     }
 
     private void EnsurePlayerLight()
@@ -179,10 +179,10 @@ public class DungeonAtmosphereController : MonoBehaviour
         }
 
         playerLight.lightType = Light2D.LightType.Point;
-        playerLight.color = Color.white;
-        playerLight.intensity = 0.55f;
-        playerLight.pointLightOuterRadius = 3.8f;
-        playerLight.pointLightInnerRadius = 0.8f;
+        playerLight.color = new Color(0.82f, 0.9f, 1f, 1f);
+        playerLight.intensity = 1.05f;
+        playerLight.pointLightOuterRadius = 6.75f;
+        playerLight.pointLightInnerRadius = 1.35f;
     }
 
     private void EnsureVolume()
@@ -213,19 +213,19 @@ public class DungeonAtmosphereController : MonoBehaviour
         bloom = runtimeProfile.TryGet(out bloom) ? bloom : runtimeProfile.Add<Bloom>(true);
         liftGammaGain = runtimeProfile.TryGet(out liftGammaGain) ? liftGammaGain : runtimeProfile.Add<LiftGammaGain>(true);
 
-        colorAdjustments.postExposure.Override(0f);
-        colorAdjustments.contrast.Override(20f);
-        colorAdjustments.saturation.Override(-10f);
+        colorAdjustments.postExposure.Override(0.55f);
+        colorAdjustments.contrast.Override(6f);
+        colorAdjustments.saturation.Override(0f);
 
         vignette.color.Override(new Color(0f, 0f, 0f, 1f));
-        vignette.intensity.Override(0.3f);
-        vignette.smoothness.Override(0.5f);
+        vignette.intensity.Override(0.1f);
+        vignette.smoothness.Override(0.35f);
         vignette.rounded.Override(false);
 
-        bloom.intensity.Override(0f);
+        bloom.intensity.Override(0.12f);
         bloom.threshold.Override(0.8f);
 
-        liftGammaGain.lift.Override(new Vector4(-0.05f, -0.02f, 0.05f, 0f));
+        liftGammaGain.lift.Override(new Vector4(0.03f, 0.03f, 0.06f, 0f));
     }
 
     private void DecorateRooms(string sceneName, DungeonRoom[] rooms)
@@ -299,8 +299,8 @@ public class DungeonAtmosphereController : MonoBehaviour
             return;
         }
 
-        float baseSaturation = -10f;
-        float baseVignette = bossRoomActive ? 0.5f : 0.3f;
+        float baseSaturation = 0f;
+        float baseVignette = bossRoomActive ? 0.28f : 0.1f;
         float lowHpExtra = 0f;
 
         PlayerHealth playerHealth = FindFirstObjectByType<PlayerHealth>();
@@ -311,13 +311,13 @@ public class DungeonAtmosphereController : MonoBehaviour
             {
                 float pulse = Mathf.Lerp(0.4f, 0.6f, (Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f) + 1f) * 0.5f);
                 lowHpExtra = pulse - 0.3f;
-                baseSaturation = Mathf.Lerp(-20f, 0f, (Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f) + 1f) * 0.5f);
+                baseSaturation = Mathf.Lerp(-12f, 4f, (Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f) + 1f) * 0.5f);
             }
         }
 
         colorAdjustments.saturation.Override(baseSaturation);
         vignette.intensity.Override(Mathf.Clamp01(baseVignette + lowHpExtra));
-        bloom.intensity.Override(bossRoomActive ? 0.3f : 0f);
+        bloom.intensity.Override(bossRoomActive ? 0.2f : 0.12f);
     }
 
     private bool IsDungeonScene(string sceneName)

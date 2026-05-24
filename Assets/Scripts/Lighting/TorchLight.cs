@@ -6,8 +6,8 @@ public class TorchLight : MonoBehaviour
 {
     [SerializeField] private Light2D pointLight;
     [SerializeField] private ParticleSystem sparkParticles;
-    [SerializeField] private float minIntensity = 1.9f;
-    [SerializeField] private float maxIntensity = 2.8f;
+    [SerializeField] private float minIntensity = 2.2f;
+    [SerializeField] private float maxIntensity = 3.15f;
 
     private void Awake()
     {
@@ -29,9 +29,9 @@ public class TorchLight : MonoBehaviour
 
         pointLight.lightType = Light2D.LightType.Point;
         pointLight.color = new Color(1f, 0.55f, 0.26f, 1f);
-        pointLight.intensity = 2.35f;
-        pointLight.pointLightOuterRadius = 5.4f;
-        pointLight.pointLightInnerRadius = 0.7f;
+        pointLight.intensity = 2.65f;
+        pointLight.pointLightOuterRadius = 6.2f;
+        pointLight.pointLightInnerRadius = 0.9f;
     }
 
     private void EnsureParticles()

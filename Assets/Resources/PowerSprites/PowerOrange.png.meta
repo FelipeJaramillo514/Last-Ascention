@@ -1,0 +1,832 @@
+fileFormatVersion: 2
+guid: b45e2602a7b9c524096d9f22799db8ad
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3168708986200355932
+    second: PowerOrange_0
+  - first:
+      213: -6953386637616354880
+    second: PowerOrange_1
+  - first:
+      213: 7413081266799972411
+    second: PowerOrange_2
+  - first:
+      213: 7909206561861909300
+    second: PowerOrange_3
+  - first:
+      213: 648686808715204505
+    second: PowerOrange_4
+  - first:
+      213: 9184040734243642676
+    second: PowerOrange_5
+  - first:
+      213: -2406531768916791735
+    second: PowerOrange_6
+  - first:
+      213: 8840461996930923028
+    second: PowerOrange_7
+  - first:
+      213: -4560348400364119502
+    second: PowerOrange_8
+  - first:
+      213: -6043902937809856286
+    second: PowerOrange_9
+  - first:
+      213: -372837301120788017
+    second: PowerOrange_10
+  - first:
+      213: 7908621754960304409
+    second: PowerOrange_11
+  - first:
+      213: 5108688632534721503
+    second: PowerOrange_12
+  - first:
+      213: 3889317436152873354
+    second: PowerOrange_13
+  - first:
+      213: -8620983197858047327
+    second: PowerOrange_14
+  - first:
+      213: 491543415845678071
+    second: PowerOrange_15
+  - first:
+      213: 8692379314942547633
+    second: PowerOrange_16
+  - first:
+      213: 720309864864551477
+    second: PowerOrange_17
+  - first:
+      213: -8045524061351806136
+    second: PowerOrange_18
+  - first:
+      213: 6291176058455554439
+    second: PowerOrange_19
+  - first:
+      213: 6206679977068464172
+    second: PowerOrange_20
+  - first:
+      213: 4681495149473462844
+    second: PowerOrange_21
+  - first:
+      213: -891793064920754170
+    second: PowerOrange_22
+  - first:
+      213: -5516260228369645566
+    second: PowerOrange_23
+  - first:
+      213: -3816892774610008764
+    second: PowerOrange_24
+  - first:
+      213: -8033866525073165078
+    second: PowerOrange_25
+  - first:
+      213: 8713237421970720443
+    second: PowerOrange_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: PowerOrange_0
+      rect:
+        serializedVersion: 2
+        x: 429
+        y: 869
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ab80f037fb7604d0800000000000000
+      internalID: -3168708986200355932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_1
+      rect:
+        serializedVersion: 2
+        x: 624
+        y: 828
+        width: 42
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c9ede691bb908f90800000000000000
+      internalID: -6953386637616354880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_2
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 203
+        width: 620
+        height: 639
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3017bec22e80e660800000000000000
+      internalID: 7413081266799972411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_3
+      rect:
+        serializedVersion: 2
+        x: 368
+        y: 839
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43bb7f6967523cd60800000000000000
+      internalID: 7909206561861909300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_4
+      rect:
+        serializedVersion: 2
+        x: 490
+        y: 840
+        width: 44
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99793f33739900900800000000000000
+      internalID: 648686808715204505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_5
+      rect:
+        serializedVersion: 2
+        x: 685
+        y: 829
+        width: 12
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43d5f4f7364447f70800000000000000
+      internalID: 9184040734243642676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_6
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 696
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94ea5054b184a9ed0800000000000000
+      internalID: -2406531768916791735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_7
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 633
+        width: 17
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41a7861f851afaa70800000000000000
+      internalID: 8840461996930923028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_8
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 586
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23a9648aa4366b0c0800000000000000
+      internalID: -4560348400364119502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_9
+      rect:
+        serializedVersion: 2
+        x: 826
+        y: 572
+        width: 15
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e857eecc4ebf1ca0800000000000000
+      internalID: -6043902937809856286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_10
+      rect:
+        serializedVersion: 2
+        x: 859
+        y: 552
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc91ea3337a63daf0800000000000000
+      internalID: -372837301120788017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_11
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 521
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 919d55f959111cd60800000000000000
+      internalID: 7908621754960304409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_12
+      rect:
+        serializedVersion: 2
+        x: 859
+        y: 491
+        width: 33
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd3ee4a8e35b5e640800000000000000
+      internalID: 5108688632534721503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_13
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 501
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8100a80a91a9f530800000000000000
+      internalID: 3889317436152873354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_14
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 439
+        width: 29
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1aa5f0d157d1c5880800000000000000
+      internalID: -8620983197858047327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_15
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 439
+        width: 14
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fbe925e12052d600800000000000000
+      internalID: 491543415845678071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_16
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 442
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b69a18cee881a870800000000000000
+      internalID: 8692379314942547633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_17
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 409
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5321677710e0ff900800000000000000
+      internalID: 720309864864551477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_18
+      rect:
+        serializedVersion: 2
+        x: 859
+        y: 409
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84b74434e7e885090800000000000000
+      internalID: -8045524061351806136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_19
+      rect:
+        serializedVersion: 2
+        x: 839
+        y: 357
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7897fa70b4fbe4750800000000000000
+      internalID: 6291176058455554439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_20
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 182
+        width: 408
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2802b30e8e822650800000000000000
+      internalID: 6206679977068464172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_21
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 317
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3a741ae80308f040800000000000000
+      internalID: 4681495149473462844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_22
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 188
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 608dd30bee6bf93f0800000000000000
+      internalID: -891793064920754170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_23
+      rect:
+        serializedVersion: 2
+        x: 491
+        y: 182
+        width: 24
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20089677c8e4273b0800000000000000
+      internalID: -5516260228369645566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_24
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 153
+        width: 43
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4458d978e3ca70bc0800000000000000
+      internalID: -3816892774610008764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_25
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 163
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae4bc10f5f8f18090800000000000000
+      internalID: -8033866525073165078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PowerOrange_26
+      rect:
+        serializedVersion: 2
+        x: 521
+        y: 153
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb684344543abe870800000000000000
+      internalID: 8713237421970720443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      PowerOrange_0: -3168708986200355932
+      PowerOrange_1: -6953386637616354880
+      PowerOrange_10: -372837301120788017
+      PowerOrange_11: 7908621754960304409
+      PowerOrange_12: 5108688632534721503
+      PowerOrange_13: 3889317436152873354
+      PowerOrange_14: -8620983197858047327
+      PowerOrange_15: 491543415845678071
+      PowerOrange_16: 8692379314942547633
+      PowerOrange_17: 720309864864551477
+      PowerOrange_18: -8045524061351806136
+      PowerOrange_19: 6291176058455554439
+      PowerOrange_2: 7413081266799972411
+      PowerOrange_20: 6206679977068464172
+      PowerOrange_21: 4681495149473462844
+      PowerOrange_22: -891793064920754170
+      PowerOrange_23: -5516260228369645566
+      PowerOrange_24: -3816892774610008764
+      PowerOrange_25: -8033866525073165078
+      PowerOrange_26: 8713237421970720443
+      PowerOrange_3: 7909206561861909300
+      PowerOrange_4: 648686808715204505
+      PowerOrange_5: 9184040734243642676
+      PowerOrange_6: -2406531768916791735
+      PowerOrange_7: 8840461996930923028
+      PowerOrange_8: -4560348400364119502
+      PowerOrange_9: -6043902937809856286
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -10,6 +10,7 @@ public class WeaponManager : MonoBehaviour
     [SerializeField] private GameObject weaponPickupPrefab;
     [SerializeField] private Transform weaponMount;
     [SerializeField] private WeaponBase weaponRuntime;
+    [SerializeField] private bool showEquippedWeaponSprite;
 
     private readonly int[] slotAmmo = new int[2];
 
@@ -142,6 +143,7 @@ public class WeaponManager : MonoBehaviour
         WeaponData activeWeapon = equippedWeapons[activeSlot];
         int ammo = slotAmmo[activeSlot];
         weaponRuntime.SetWeaponData(activeWeapon, ammo);
+        ApplyWeaponSpriteVisibility();
         EventBus.Publish(new WeaponSwappedEvent(activeWeapon, activeSlot));
         RefreshHud();
     }
@@ -204,6 +206,20 @@ public class WeaponManager : MonoBehaviour
         renderer.sortingLayerName = "Projectiles";
         renderer.sortingOrder = 2;
         weaponRuntime = weaponObject.AddComponent<WeaponBase>();
+    }
+
+    private void ApplyWeaponSpriteVisibility()
+    {
+        if (weaponRuntime == null)
+        {
+            return;
+        }
+
+        SpriteRenderer renderer = weaponRuntime.GetComponent<SpriteRenderer>();
+        if (renderer != null)
+        {
+            renderer.enabled = showEquippedWeaponSprite && renderer.sprite != null;
+        }
     }
 
     private void DropWeapon(WeaponData weaponData, int ammo)

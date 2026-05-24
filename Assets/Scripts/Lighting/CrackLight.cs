@@ -5,8 +5,8 @@ using UnityEngine.Rendering.Universal;
 public class CrackLight : MonoBehaviour
 {
     [SerializeField] private Light2D pointLight;
-    [SerializeField] private float minIntensity = 1.45f;
-    [SerializeField] private float maxIntensity = 1.95f;
+    [SerializeField] private float minIntensity = 1.65f;
+    [SerializeField] private float maxIntensity = 2.25f;
 
     private void Awake()
     {
@@ -21,9 +21,9 @@ public class CrackLight : MonoBehaviour
 
         pointLight.lightType = Light2D.LightType.Point;
         pointLight.color = new Color(0.29f, 0.56f, 0.85f, 1f);
-        pointLight.intensity = 1.7f;
-        pointLight.pointLightOuterRadius = 4.6f;
-        pointLight.pointLightInnerRadius = 0.45f;
+        pointLight.intensity = 1.95f;
+        pointLight.pointLightOuterRadius = 5.5f;
+        pointLight.pointLightInnerRadius = 0.6f;
         StartCoroutine(FlickerRoutine());
     }
 

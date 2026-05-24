@@ -341,6 +341,16 @@ public class DungeonBuilder : MonoBehaviour
             return;
         }
 
+        if (!trigger.TraversalEnabled)
+        {
+            return;
+        }
+
+        if (trigger.SourceRoom != null && trigger.SourceRoom.IsCombatLocked)
+        {
+            return;
+        }
+
         if (Time.time < nextDoorTransitionTime)
         {
             return;

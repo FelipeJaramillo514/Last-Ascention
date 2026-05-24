@@ -12,7 +12,10 @@ public class PlayerProjectile : MonoBehaviour, IPoolable
     [SerializeField] private bool isExplosive;
     [SerializeField] private float explosionRadius = 1.5f;
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private float animationFrameRate = 12f;
 
+    private Sprite[] animationFrames;
+    private float animationTimer;
     private float remainingLifetime;
     private float distanceTravelled;
 
@@ -35,6 +38,7 @@ public class PlayerProjectile : MonoBehaviour, IPoolable
         transform.position += transform.right * step;
         distanceTravelled += step;
         remainingLifetime -= Time.deltaTime;
+        UpdateProjectileAnimation();
 
         if (remainingLifetime <= 0f || distanceTravelled >= Mathf.Max(0.1f, range))
         {
@@ -54,11 +58,18 @@ public class PlayerProjectile : MonoBehaviour, IPoolable
         range = weaponData.projectileRange > 0f ? weaponData.projectileRange : range;
         isPiercing = weaponData.isPiercing;
         isExplosive = weaponData.isExplosive;
+        animationFrames = WeaponVisualResolver.GetProjectileFrames(weaponData);
+        animationTimer = 0f;
 
         if (spriteRenderer != null)
         {
             Sprite projectileSprite = null;
-            if (weaponData.projectilePrefab != null)
+            if (animationFrames != null && animationFrames.Length > 0)
+            {
+                projectileSprite = animationFrames[0];
+            }
+
+            if (projectileSprite == null && weaponData.projectilePrefab != null)
             {
                 SpriteRenderer projectileRenderer = weaponData.projectilePrefab.GetComponentInChildren<SpriteRenderer>();
                 if (projectileRenderer != null)
@@ -92,12 +103,26 @@ public class PlayerProjectile : MonoBehaviour, IPoolable
         }
         remainingLifetime = lifetime;
         distanceTravelled = 0f;
+        animationTimer = 0f;
     }
 
     public void OnDespawn()
     {
         remainingLifetime = lifetime;
         distanceTravelled = 0f;
+        animationTimer = 0f;
+    }
+
+    private void UpdateProjectileAnimation()
+    {
+        if (spriteRenderer == null || animationFrames == null || animationFrames.Length <= 1)
+        {
+            return;
+        }
+
+        animationTimer += Time.deltaTime;
+        int frameIndex = Mathf.FloorToInt(animationTimer * animationFrameRate) % animationFrames.Length;
+        spriteRenderer.sprite = animationFrames[frameIndex];
     }
 
     private void OnTriggerEnter2D(Collider2D other)

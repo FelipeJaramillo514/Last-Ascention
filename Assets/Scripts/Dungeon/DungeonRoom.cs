@@ -5,6 +5,18 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public class DungeonRoom : MonoBehaviour
 {
+    private const string DoorSpriteResourcePath = "DungeonDoors/door_sprite";
+    private const int DoorSpriteRows = 4;
+    private const int DoorSpriteColumns = 6;
+    private const float DoorSpritePixelsPerUnit = 160f;
+    private const float DoorSpriteAnimationDuration = 0.42f;
+    private const string DoorVisualChildName = "DoorSpriteVisual";
+    private const string EntryOrangePowerResourcePath = "Weapons/PoderNaranja";
+    private const string EntryOrangePowerPickupName = "StartingOrangePower";
+
+    private static Sprite[][] doorAnimationFrames;
+    private static bool doorAnimationLoadAttempted;
+
     [SerializeField] private RoomData data;
     [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
     [SerializeField] private List<Transform> propPoints = new List<Transform>();
@@ -33,6 +45,7 @@ public class DungeonRoom : MonoBehaviour
     public RoomData Data { get { return data; } }
     public bool IsCleared { get { return isCleared; } }
     public bool IsVisited { get { return isVisited; } }
+    public bool IsCombatLocked { get { return !isCleared && activeEnemyCount > 0; } }
     public RoomType RuntimeRoomType { get { return runtimeRoomType; } }
     public Vector2Int GridPosition { get { return gridPosition; } }
     public int RoomIndex { get { return roomIndex; } }
@@ -76,6 +89,7 @@ public class DungeonRoom : MonoBehaviour
 
         ClearSpawnedProps();
         SpawnProps();
+        EnsureEntryPowerPickups();
 
         if (enemiesToSpawn != null)
         {
@@ -109,6 +123,7 @@ public class DungeonRoom : MonoBehaviour
             if (trigger != null)
             {
                 trigger.gameObject.SetActive(activeDoors[i]);
+                trigger.SetTraversalEnabled(activeDoors[i]);
             }
         }
 
@@ -343,6 +358,58 @@ public class DungeonRoom : MonoBehaviour
         }
     }
 
+    private void EnsureEntryPowerPickups()
+    {
+        if (runtimeRoomType != RoomType.Entry || transform.Find(EntryOrangePowerPickupName) != null)
+        {
+            return;
+        }
+
+        WeaponData orangePower = Resources.Load<WeaponData>(EntryOrangePowerResourcePath);
+        if (orangePower == null)
+        {
+            return;
+        }
+
+        WeaponPickup[] pickups = GetComponentsInChildren<WeaponPickup>(true);
+        WeaponPickup template = null;
+        for (int i = 0; i < pickups.Length; i++)
+        {
+            WeaponPickup pickup = pickups[i];
+            if (pickup == null)
+            {
+                continue;
+            }
+
+            if (pickup.name == EntryOrangePowerPickupName || pickup.GetWeaponData() == orangePower)
+            {
+                return;
+            }
+
+            if (template == null)
+            {
+                template = pickup;
+            }
+        }
+
+        if (template == null)
+        {
+            return;
+        }
+
+        GameObject orangePickupObject = Instantiate(template.gameObject, transform);
+        orangePickupObject.name = EntryOrangePowerPickupName;
+        orangePickupObject.transform.localPosition = template.transform.localPosition + new Vector3(-4f, 0f, 0f);
+        orangePickupObject.transform.localScale = template.transform.localScale;
+
+        WeaponPickup orangePickup = orangePickupObject.GetComponent<WeaponPickup>();
+        if (orangePickup != null)
+        {
+            int startingAmmo = orangePower.maxAmmo >= 0 ? orangePower.maxAmmo : int.MinValue;
+            orangePickup.AssignWeaponData(orangePower, startingAmmo);
+        }
+    }
+
     private void ClearSpawnedProps()
     {
         for (int i = 0; i < spawnedProps.Count; i++)
@@ -422,6 +489,7 @@ public class DungeonRoom : MonoBehaviour
             return;
         }
 
+        SetDoorTriggerEnabled(doorIndex, false);
         if (doorCoroutines[doorIndex] != null)
         {
             StopCoroutine(doorCoroutines[doorIndex]);
@@ -429,7 +497,13 @@ public class DungeonRoom : MonoBehaviour
         }
 
         BoxCollider2D solidCollider = doorObject.GetComponent<BoxCollider2D>();
-        Vector3 targetPosition = open ? openDoorLocalPositions[doorIndex] : closedDoorLocalPositions[doorIndex];
+        bool useSpriteAnimation = HasDoorSpriteAnimation(doorIndex);
+        Vector3 targetPosition = closedDoorLocalPositions[doorIndex];
+        if (!useSpriteAnimation && open)
+        {
+            targetPosition = openDoorLocalPositions[doorIndex];
+        }
+
         if (!open && solidCollider != null)
         {
             solidCollider.enabled = true;
@@ -438,10 +512,16 @@ public class DungeonRoom : MonoBehaviour
         if (immediate)
         {
             doorObject.transform.localPosition = targetPosition;
+            if (useSpriteAnimation)
+            {
+                SetDoorSpriteFrame(doorIndex, open);
+            }
+
             if (solidCollider != null)
             {
                 solidCollider.enabled = !open;
             }
+            SetDoorTriggerEnabled(doorIndex, open);
             return;
         }
 
@@ -450,7 +530,248 @@ public class DungeonRoom : MonoBehaviour
             AudioManager.Instance.PlayCue(AudioCueId.DoorOpen, doorObject.transform.position, 0.8f, 1f, true, 0.85f);
         }
 
+        if (useSpriteAnimation)
+        {
+            doorCoroutines[doorIndex] = StartCoroutine(AnimateDoorSpriteRoutine(doorIndex, doorObject.transform, solidCollider, open));
+            return;
+        }
+
         doorCoroutines[doorIndex] = StartCoroutine(AnimateDoorRoutine(doorIndex, doorObject.transform, targetPosition, solidCollider, open));
+    }
+
+    private void SetDoorTriggerEnabled(int doorIndex, bool enabled)
+    {
+        if (doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return;
+        }
+
+        DoorTrigger trigger = doorObjects[doorIndex].GetComponentInChildren<DoorTrigger>(true);
+        if (trigger != null)
+        {
+            trigger.SetTraversalEnabled(enabled);
+        }
+    }
+
+    private bool HasDoorSpriteAnimation(int doorIndex)
+    {
+        if (doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return false;
+        }
+
+        Sprite[] frames = GetDoorAnimationFrames(doorIndex);
+        return frames != null && frames.Length > 0 && GetDoorVisualRenderer(doorIndex, true) != null;
+    }
+
+    private void SetDoorSpriteFrame(int doorIndex, bool open)
+    {
+        Sprite[] frames = GetDoorAnimationFrames(doorIndex);
+        if (frames == null || frames.Length == 0 || doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return;
+        }
+
+        SpriteRenderer renderer = GetDoorVisualRenderer(doorIndex, true);
+        if (renderer == null)
+        {
+            return;
+        }
+
+        renderer.color = Color.white;
+        renderer.sprite = open ? frames[0] : frames[frames.Length - 1];
+        ApplyDoorVisualLayout(doorIndex, renderer);
+    }
+
+    private Sprite[] GetDoorAnimationFrames(int doorIndex)
+    {
+        EnsureDoorAnimationFrames();
+        if (doorAnimationFrames == null || doorIndex < 0 || doorIndex >= doorAnimationFrames.Length)
+        {
+            return null;
+        }
+
+        return doorAnimationFrames[doorIndex];
+    }
+
+    private static void EnsureDoorAnimationFrames()
+    {
+        if (doorAnimationLoadAttempted)
+        {
+            return;
+        }
+
+        doorAnimationLoadAttempted = true;
+        Texture2D texture = Resources.Load<Texture2D>(DoorSpriteResourcePath);
+        if (texture == null)
+        {
+            Sprite sourceSprite = Resources.Load<Sprite>(DoorSpriteResourcePath);
+            texture = sourceSprite != null ? sourceSprite.texture : null;
+        }
+
+        if (texture == null)
+        {
+            return;
+        }
+
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        doorAnimationFrames = new Sprite[DoorSpriteRows][];
+        for (int row = 0; row < DoorSpriteRows; row++)
+        {
+            doorAnimationFrames[row] = new Sprite[DoorSpriteColumns];
+            for (int column = 0; column < DoorSpriteColumns; column++)
+            {
+                int left = Mathf.RoundToInt(column * texture.width / (float)DoorSpriteColumns);
+                int right = Mathf.RoundToInt((column + 1) * texture.width / (float)DoorSpriteColumns);
+                int top = Mathf.RoundToInt(row * texture.height / (float)DoorSpriteRows);
+                int bottom = Mathf.RoundToInt((row + 1) * texture.height / (float)DoorSpriteRows);
+                int width = Mathf.Max(1, right - left);
+                int height = Mathf.Max(1, bottom - top);
+                int unityY = texture.height - bottom;
+                Rect rect = new Rect(left, unityY, width, height);
+                doorAnimationFrames[row][column] = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), DoorSpritePixelsPerUnit);
+            }
+        }
+    }
+
+    private IEnumerator AnimateDoorSpriteRoutine(int doorIndex, Transform doorTransform, BoxCollider2D solidCollider, bool opening)
+    {
+        Sprite[] frames = GetDoorAnimationFrames(doorIndex);
+        SpriteRenderer renderer = GetDoorVisualRenderer(doorIndex, true);
+        if (doorTransform != null)
+        {
+            doorTransform.localPosition = closedDoorLocalPositions[doorIndex];
+        }
+
+        if (frames == null || frames.Length == 0 || renderer == null)
+        {
+            if (doorTransform != null)
+            {
+                doorTransform.localPosition = opening ? openDoorLocalPositions[doorIndex] : closedDoorLocalPositions[doorIndex];
+            }
+
+            if (solidCollider != null)
+            {
+                solidCollider.enabled = !opening;
+            }
+
+            SetDoorTriggerEnabled(doorIndex, opening);
+            doorCoroutines[doorIndex] = null;
+            yield break;
+        }
+
+        renderer.color = Color.white;
+        renderer.sprite = opening ? frames[frames.Length - 1] : frames[0];
+        ApplyDoorVisualLayout(doorIndex, renderer);
+        if (!opening && solidCollider != null)
+        {
+            solidCollider.enabled = true;
+        }
+
+        float elapsed = 0f;
+        while (elapsed < DoorSpriteAnimationDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / DoorSpriteAnimationDuration);
+            int frameIndex = Mathf.RoundToInt(t * (frames.Length - 1));
+            if (opening)
+            {
+                frameIndex = frames.Length - 1 - frameIndex;
+            }
+
+            renderer.sprite = frames[Mathf.Clamp(frameIndex, 0, frames.Length - 1)];
+            yield return null;
+        }
+
+        renderer.sprite = opening ? frames[0] : frames[frames.Length - 1];
+        ApplyDoorVisualLayout(doorIndex, renderer);
+        if (solidCollider != null)
+        {
+            solidCollider.enabled = !opening;
+        }
+
+        SetDoorTriggerEnabled(doorIndex, opening);
+        doorCoroutines[doorIndex] = null;
+    }
+
+    private SpriteRenderer GetDoorVisualRenderer(int doorIndex, bool create)
+    {
+        if (doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return null;
+        }
+
+        Transform doorTransform = doorObjects[doorIndex].transform;
+        Transform visualTransform = doorTransform.Find(DoorVisualChildName);
+        if (visualTransform == null)
+        {
+            if (!create)
+            {
+                return null;
+            }
+
+            GameObject visualObject = new GameObject(DoorVisualChildName);
+            visualTransform = visualObject.transform;
+            visualTransform.SetParent(doorTransform, false);
+        }
+
+        SpriteRenderer renderer = visualTransform.GetComponent<SpriteRenderer>();
+        if (renderer == null)
+        {
+            renderer = visualTransform.gameObject.AddComponent<SpriteRenderer>();
+        }
+
+        SpriteRenderer sourceRenderer = doorObjects[doorIndex].GetComponent<SpriteRenderer>();
+        if (sourceRenderer != null)
+        {
+            renderer.sortingLayerID = sourceRenderer.sortingLayerID;
+            renderer.sortingOrder = sourceRenderer.sortingOrder + 1;
+            sourceRenderer.enabled = false;
+        }
+        else
+        {
+            renderer.sortingOrder = 3;
+        }
+
+        renderer.enabled = true;
+        return renderer;
+    }
+
+    private void ApplyDoorVisualLayout(int doorIndex, SpriteRenderer renderer)
+    {
+        if (renderer == null || renderer.sprite == null || doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return;
+        }
+
+        Transform visualTransform = renderer.transform;
+        Transform doorTransform = doorObjects[doorIndex].transform;
+        visualTransform.localPosition = GetDoorVisualOffset();
+        visualTransform.localRotation = Quaternion.identity;
+
+        Vector2 targetSize = GetDoorVisualTargetSize(doorIndex);
+        Vector3 spriteSize = renderer.sprite.bounds.size;
+        float parentScaleX = Mathf.Abs(doorTransform.localScale.x) > 0.001f ? Mathf.Abs(doorTransform.localScale.x) : 1f;
+        float parentScaleY = Mathf.Abs(doorTransform.localScale.y) > 0.001f ? Mathf.Abs(doorTransform.localScale.y) : 1f;
+        float scaleX = spriteSize.x > 0.001f ? targetSize.x / spriteSize.x / parentScaleX : 1f;
+        float scaleY = spriteSize.y > 0.001f ? targetSize.y / spriteSize.y / parentScaleY : 1f;
+        visualTransform.localScale = new Vector3(scaleX, scaleY, 1f);
+    }
+
+    private Vector3 GetDoorVisualOffset()
+    {
+        return Vector3.zero;
+    }
+
+    private Vector2 GetDoorVisualTargetSize(int doorIndex)
+    {
+        if (doorIndex == 2 || doorIndex == 3)
+        {
+            return new Vector2(2.25f, 2.65f);
+        }
+
+        return new Vector2(2.65f, 2.25f);
     }
 
     private IEnumerator AnimateDoorRoutine(int doorIndex, Transform doorTransform, Vector3 targetPosition, BoxCollider2D solidCollider, bool opening)
@@ -471,6 +792,7 @@ public class DungeonRoom : MonoBehaviour
         {
             solidCollider.enabled = !opening;
         }
+        SetDoorTriggerEnabled(doorIndex, opening);
         doorCoroutines[doorIndex] = null;
     }
 }

@@ -16,13 +16,18 @@ public class DungeonCameraController : MonoBehaviour
     [SerializeField] private CinemachineConfiner2D gameplayConfiner;
     [SerializeField] private CinemachineConfiner2D bossConfiner;
     [SerializeField] private Vector3 fallbackOffset = new Vector3(0f, 0f, -10f);
-    [SerializeField] private float fallbackSmoothTime = 0.12f;
+    [SerializeField] private float fallbackSmoothTime = 0.16f;
     [SerializeField] private float fallbackSnapDistance = 8f;
+    [SerializeField] private float aimLookAhead = 0.45f;
+    [SerializeField] private float verticalFramingOffset = 0.12f;
+    [SerializeField] private float cameraTargetSmoothTime = 0.18f;
 
     private readonly Dictionary<int, PolygonCollider2D> confinersByRoom = new Dictionary<int, PolygonCollider2D>();
     private DungeonRoom observedRoom;
     private BossBase observedBoss;
     private Vector3 fallbackVelocity;
+    private Vector3 cameraTargetVelocity;
+    private Transform cameraFollowTarget;
     private Transform lastResolvedTarget;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -89,6 +94,7 @@ public class DungeonCameraController : MonoBehaviour
 
     private void LateUpdate()
     {
+        UpdateCameraFollowTarget();
         ApplyFallbackFollow();
     }
 
@@ -178,11 +184,12 @@ public class DungeonCameraController : MonoBehaviour
         brain.DefaultBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.EaseInOut, 1f);
         brain.IgnoreTimeScale = true;
 
-        gameplayCamera = EnsureVirtualCamera("GameplayCamera", ref gameplayConfiner, 5f, 10);
-        bossCamera = EnsureVirtualCamera("BossCamera", ref bossConfiner, 8f, 0);
+        Transform followTarget = EnsureCameraFollowTarget();
+        gameplayCamera = EnsureVirtualCamera("GameplayCamera", ref gameplayConfiner, 6.25f, 10, followTarget);
+        bossCamera = EnsureVirtualCamera("BossCamera", ref bossConfiner, 8.75f, 0, followTarget);
     }
 
-    private CinemachineVirtualCamera EnsureVirtualCamera(string objectName, ref CinemachineConfiner2D confiner, float orthographicSize, int priority)
+    private CinemachineVirtualCamera EnsureVirtualCamera(string objectName, ref CinemachineConfiner2D confiner, float orthographicSize, int priority, Transform followTarget)
     {
         Transform target = transform.Find(objectName);
         if (target == null)
@@ -198,7 +205,7 @@ public class DungeonCameraController : MonoBehaviour
             virtualCamera = target.gameObject.AddComponent<CinemachineVirtualCamera>();
         }
 
-        virtualCamera.m_Follow = player != null ? player.transform : null;
+        virtualCamera.m_Follow = followTarget != null ? followTarget : player != null ? player.transform : null;
         virtualCamera.m_Lens.OrthographicSize = orthographicSize;
         virtualCamera.m_Lens.ModeOverride = LensSettings.OverrideModes.Orthographic;
         virtualCamera.Priority = priority;
@@ -209,12 +216,12 @@ public class DungeonCameraController : MonoBehaviour
             framing = virtualCamera.AddCinemachineComponent<CinemachineFramingTransposer>();
         }
         framing.m_CameraDistance = 10f;
-        framing.m_DeadZoneWidth = 0.1f;
-        framing.m_DeadZoneHeight = 0.1f;
-        framing.m_SoftZoneWidth = 0.8f;
-        framing.m_SoftZoneHeight = 0.8f;
-        framing.m_XDamping = 0.3f;
-        framing.m_YDamping = 0.3f;
+        framing.m_DeadZoneWidth = 0.05f;
+        framing.m_DeadZoneHeight = 0.05f;
+        framing.m_SoftZoneWidth = 0.92f;
+        framing.m_SoftZoneHeight = 0.92f;
+        framing.m_XDamping = 0.45f;
+        framing.m_YDamping = 0.45f;
         framing.m_ZDamping = 0f;
         framing.m_LookaheadTime = 0f;
 
@@ -223,7 +230,7 @@ public class DungeonCameraController : MonoBehaviour
         {
             confiner = target.gameObject.AddComponent<CinemachineConfiner2D>();
         }
-        confiner.Damping = 0.5f;
+        confiner.Damping = 0.25f;
 
         CinemachineImpulseListener impulseListener = target.GetComponent<CinemachineImpulseListener>();
         if (impulseListener == null)
@@ -318,19 +325,20 @@ public class DungeonCameraController : MonoBehaviour
             return;
         }
 
+        Transform followTarget = cameraFollowTarget != null ? cameraFollowTarget : player.transform;
         bool hasCinemachineFollow = brain != null
             && brain.enabled
             && gameplayCamera != null
             && gameplayCamera.enabled
             && gameplayCamera.gameObject.activeInHierarchy
-            && gameplayCamera.Follow == player.transform;
+            && gameplayCamera.Follow == followTarget;
 
         if (hasCinemachineFollow)
         {
             return;
         }
 
-        Vector3 targetPosition = player.transform.position + fallbackOffset;
+        Vector3 targetPosition = followTarget.position + fallbackOffset;
         targetPosition.z = fallbackOffset.z;
 
         if (Vector2.Distance(mainCamera.transform.position, targetPosition) > fallbackSnapDistance)
@@ -355,8 +363,99 @@ public class DungeonCameraController : MonoBehaviour
             return;
         }
 
-        Vector3 targetPosition = player.transform.position + fallbackOffset;
+        Vector3 desiredCenter = GetDesiredCameraTargetPosition();
+        if (cameraFollowTarget != null)
+        {
+            cameraFollowTarget.position = desiredCenter;
+            cameraTargetVelocity = Vector3.zero;
+        }
+
+        Vector3 targetPosition = desiredCenter + fallbackOffset;
         targetPosition.z = fallbackOffset.z;
         mainCamera.transform.position = targetPosition;
+    }
+
+    private Transform EnsureCameraFollowTarget()
+    {
+        if (cameraFollowTarget != null)
+        {
+            return cameraFollowTarget;
+        }
+
+        Transform existing = transform.Find("CameraFollowTarget");
+        if (existing != null)
+        {
+            cameraFollowTarget = existing;
+        }
+        else
+        {
+            GameObject targetObject = new GameObject("CameraFollowTarget");
+            cameraFollowTarget = targetObject.transform;
+            cameraFollowTarget.SetParent(transform, false);
+        }
+
+        cameraFollowTarget.position = GetDesiredCameraTargetPosition();
+        return cameraFollowTarget;
+    }
+
+    private void UpdateCameraFollowTarget()
+    {
+        if (player == null)
+        {
+            return;
+        }
+
+        Transform followTarget = EnsureCameraFollowTarget();
+        Vector3 desiredPosition = GetDesiredCameraTargetPosition();
+        float smoothTime = Mathf.Max(0.001f, cameraTargetSmoothTime);
+        followTarget.position = Vector3.SmoothDamp(
+            followTarget.position,
+            desiredPosition,
+            ref cameraTargetVelocity,
+            smoothTime,
+            Mathf.Infinity,
+            Time.unscaledDeltaTime);
+    }
+
+    private Vector3 GetDesiredCameraTargetPosition()
+    {
+        if (player == null)
+        {
+            return Vector3.zero;
+        }
+
+        Vector2 aim = player.AimDirection.sqrMagnitude > 0.001f ? player.AimDirection.normalized : Vector2.down;
+        Vector3 targetPosition = player.transform.position + (Vector3)(aim * aimLookAhead) + (Vector3.up * verticalFramingOffset);
+        targetPosition = ClampTargetToCurrentRoom(targetPosition);
+        targetPosition.z = 0f;
+        return targetPosition;
+    }
+
+    private Vector3 ClampTargetToCurrentRoom(Vector3 targetPosition)
+    {
+        if (observedRoom == null)
+        {
+            return targetPosition;
+        }
+
+        BoxCollider2D roomBounds = observedRoom.GetComponent<BoxCollider2D>();
+        if (roomBounds == null)
+        {
+            return targetPosition;
+        }
+
+        Bounds bounds = roomBounds.bounds;
+        float padding = 1.25f;
+        if (bounds.size.x > padding * 2f)
+        {
+            targetPosition.x = Mathf.Clamp(targetPosition.x, bounds.min.x + padding, bounds.max.x - padding);
+        }
+
+        if (bounds.size.y > padding * 2f)
+        {
+            targetPosition.y = Mathf.Clamp(targetPosition.y, bounds.min.y + padding, bounds.max.y - padding);
+        }
+
+        return targetPosition;
     }
 }

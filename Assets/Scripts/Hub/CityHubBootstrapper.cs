@@ -1,11 +1,16 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class CityHubBootstrapper : MonoBehaviour
 {
+    private const float HubBuildingPixelsPerUnit = 180f;
+
     private static CityHubBootstrapper instance;
+    private static readonly Dictionary<string, Sprite> hubBuildingSpriteCache = new Dictionary<string, Sprite>();
 
     [SerializeField] private Transform runtimeRoot;
     [SerializeField] private HubBuildingInteractable nearbyBuilding;
@@ -146,13 +151,16 @@ public class CityHubBootstrapper : MonoBehaviour
                 follow = mainCamera.gameObject.AddComponent<HubCameraFollow>();
             }
             follow.SetTarget(player != null ? player.transform : null);
+            follow.SetWorldBounds(new Vector2(-10f, -7.5f), new Vector2(10f, 6.5f));
             mainCamera.orthographic = true;
-            mainCamera.orthographicSize = 5f;
+            mainCamera.orthographicSize = 5.9f;
+            mainCamera.backgroundColor = new Color32(42, 46, 60, 255);
         }
 
         BuildGround();
         BuildParallax(mainCamera != null ? mainCamera.transform : null);
         BuildBuildings();
+        EnsureCityLighting(player);
         EnsurePromptUi();
         EnsurePanels();
     }
@@ -163,7 +171,7 @@ public class CityHubBootstrapper : MonoBehaviour
         ground.transform.SetParent(runtimeRoot, false);
         SpriteRenderer renderer = ground.AddComponent<SpriteRenderer>();
         renderer.sortingLayerName = "Floor";
-        renderer.sprite = CreateBlockSprite(320, 240, new Color32(25, 30, 38, 255), new Color32(34, 40, 52, 255));
+        renderer.sprite = CreateBlockSprite(320, 240, new Color32(42, 50, 64, 255), new Color32(56, 66, 82, 255));
     }
 
     private void BuildParallax(Transform cameraTransform)
@@ -173,7 +181,7 @@ public class CityHubBootstrapper : MonoBehaviour
         skyline.transform.localPosition = new Vector3(0f, 2.6f, 8f);
         SpriteRenderer skylineRenderer = skyline.AddComponent<SpriteRenderer>();
         skylineRenderer.sortingLayerName = "Background";
-        skylineRenderer.sprite = CreateBlockSprite(320, 96, new Color32(18, 18, 24, 255), new Color32(30, 30, 38, 255));
+        skylineRenderer.sprite = CreateBlockSprite(320, 96, new Color32(34, 36, 50, 255), new Color32(54, 58, 74, 255));
         HubParallaxLayer skylineParallax = skyline.AddComponent<HubParallaxLayer>();
         skylineParallax.SetMultiplier(0.5f);
 
@@ -197,14 +205,101 @@ public class CityHubBootstrapper : MonoBehaviour
         }
     }
 
-    private void BuildBuildings()
+    private void EnsureCityLighting(KaisenController player)
     {
-        CreateBuilding("Hospital", HubBuildingType.Hospital, new Vector3(-6f, -1.5f, 0f), new Color32(200, 225, 235, 255), "HOSPITAL");
-        CreateBuilding("Association", HubBuildingType.Association, new Vector3(0f, -1.25f, 0f), new Color32(105, 112, 126, 255), "ASOCIACION");
-        CreateBuilding("BlackMarket", HubBuildingType.BlackMarket, new Vector3(6f, -1.75f, 0f), new Color32(42, 42, 48, 255), "MERCADO");
+        Transform lightRoot = runtimeRoot.Find("CityLighting");
+        if (lightRoot == null)
+        {
+            GameObject lightRootObject = new GameObject("CityLighting");
+            lightRoot = lightRootObject.transform;
+            lightRoot.SetParent(runtimeRoot, false);
+        }
+
+        Transform globalLightTransform = lightRoot.Find("CityGlobalLight");
+        Light2D globalLight = globalLightTransform != null ? globalLightTransform.GetComponent<Light2D>() : null;
+        if (globalLight == null)
+        {
+            GameObject lightObject = new GameObject("CityGlobalLight");
+            lightObject.transform.SetParent(lightRoot, false);
+            globalLight = lightObject.AddComponent<Light2D>();
+        }
+
+        globalLight.lightType = Light2D.LightType.Global;
+        globalLight.color = new Color(0.9f, 0.94f, 1f, 1f);
+        globalLight.intensity = 0.9f;
+
+        if (player == null)
+        {
+            return;
+        }
+
+        Transform playerLightTransform = player.transform.Find("PlayerReadabilityLight");
+        Light2D playerLight = playerLightTransform != null ? playerLightTransform.GetComponent<Light2D>() : null;
+        if (playerLight == null)
+        {
+            GameObject lightObject = new GameObject("PlayerReadabilityLight");
+            lightObject.transform.SetParent(player.transform, false);
+            lightObject.transform.localPosition = Vector3.zero;
+            playerLight = lightObject.AddComponent<Light2D>();
+        }
+
+        playerLight.lightType = Light2D.LightType.Point;
+        playerLight.color = new Color(0.75f, 0.88f, 1f, 1f);
+        playerLight.intensity = 1.1f;
+        playerLight.pointLightOuterRadius = 6.8f;
+        playerLight.pointLightInnerRadius = 1.35f;
     }
 
-    private void CreateBuilding(string objectName, HubBuildingType buildingType, Vector3 position, Color32 color, string label)
+    private void BuildBuildings()
+    {
+        CreateBuilding(
+            "Hospital",
+            HubBuildingType.Hospital,
+            new Vector3(-6f, -1.5f, 0f),
+            "HubBuildings/hospital",
+            new Color32(200, 225, 235, 255),
+            "HOSPITAL",
+            new Vector2(3.15f, 3.0f),
+            new Vector2(0f, -0.1f),
+            new Vector2(3.4f, 1.45f),
+            new Vector2(0f, -2.05f));
+
+        CreateBuilding(
+            "Association",
+            HubBuildingType.Association,
+            new Vector3(0f, -1.25f, 0f),
+            "HubBuildings/asociacion",
+            new Color32(105, 112, 126, 255),
+            "ASOCIACION",
+            new Vector2(3.35f, 3.05f),
+            new Vector2(0f, -0.1f),
+            new Vector2(3.6f, 1.45f),
+            new Vector2(0f, -2.05f));
+
+        CreateBuilding(
+            "BlackMarket",
+            HubBuildingType.BlackMarket,
+            new Vector3(6f, -1.75f, 0f),
+            "HubBuildings/mercado",
+            new Color32(42, 42, 48, 255),
+            "MERCADO",
+            new Vector2(5.25f, 2.45f),
+            new Vector2(0f, -0.35f),
+            new Vector2(5.25f, 1.55f),
+            new Vector2(0f, -2.1f));
+    }
+
+    private void CreateBuilding(
+        string objectName,
+        HubBuildingType buildingType,
+        Vector3 position,
+        string spriteResourcePath,
+        Color32 fallbackColor,
+        string label,
+        Vector2 solidSize,
+        Vector2 solidOffset,
+        Vector2 triggerSize,
+        Vector2 triggerOffset)
     {
         GameObject building = new GameObject(objectName);
         building.transform.SetParent(runtimeRoot, false);
@@ -212,19 +307,20 @@ public class CityHubBootstrapper : MonoBehaviour
 
         SpriteRenderer renderer = building.AddComponent<SpriteRenderer>();
         renderer.sortingLayerName = "Props";
-        renderer.sprite = CreateBlockSprite(48, 64, color, color);
+        renderer.sortingOrder = 3;
+        renderer.sprite = LoadHubBuildingSprite(spriteResourcePath, fallbackColor);
 
         BoxCollider2D solid = building.AddComponent<BoxCollider2D>();
-        solid.size = new Vector2(2.8f, 3.4f);
-        solid.offset = new Vector2(0f, -0.1f);
+        solid.size = solidSize;
+        solid.offset = solidOffset;
         solid.isTrigger = false;
 
         GameObject triggerObject = new GameObject("Trigger");
         triggerObject.transform.SetParent(building.transform, false);
         BoxCollider2D trigger = triggerObject.AddComponent<BoxCollider2D>();
         trigger.isTrigger = true;
-        trigger.size = new Vector2(3.8f, 1.6f);
-        trigger.offset = new Vector2(0f, -2.35f);
+        trigger.size = triggerSize;
+        trigger.offset = triggerOffset;
         HubBuildingInteractable interactable = triggerObject.AddComponent<HubBuildingInteractable>();
         interactable.Configure(this, buildingType);
 
@@ -237,6 +333,31 @@ public class CityHubBootstrapper : MonoBehaviour
         textMesh.fontSize = 32;
         textMesh.anchor = TextAnchor.MiddleCenter;
         textMesh.color = Color.white;
+    }
+
+    private Sprite LoadHubBuildingSprite(string resourcePath, Color32 fallbackColor)
+    {
+        Sprite cachedSprite;
+        if (hubBuildingSpriteCache.TryGetValue(resourcePath, out cachedSprite) && cachedSprite != null)
+        {
+            return cachedSprite;
+        }
+
+        Texture2D texture = Resources.Load<Texture2D>(resourcePath);
+        if (texture == null)
+        {
+            return CreateBlockSprite(48, 64, fallbackColor, fallbackColor);
+        }
+
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        Sprite sprite = Sprite.Create(
+            texture,
+            new Rect(0f, 0f, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f),
+            HubBuildingPixelsPerUnit);
+        hubBuildingSpriteCache[resourcePath] = sprite;
+        return sprite;
     }
 
     private void EnsurePromptUi()

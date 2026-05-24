@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 3293183136613438693}
   - component: {fileID: 4949189409389680253}
   - component: {fileID: 7860722445099907790}
+  - component: {fileID: 3401731368012154763}
+  - component: {fileID: 7686394780747701529}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -111,7 +113,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e14403c326ff3de48b8d74a502d1919a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::KaisenController
   rb: {fileID: 1126903256383939333}
   capsuleCollider: {fileID: 5537977471561325575}
@@ -121,6 +123,8 @@ MonoBehaviour:
   mainCamera: {fileID: 0}
   playerHealth: {fileID: 0}
   weaponManager: {fileID: 0}
+  knifeAuraAttack: {fileID: 0}
+  orangeFireAbility: {fileID: 0}
   stats:
     systemLevel: 1
     strength: 5
@@ -156,6 +160,8 @@ MonoBehaviour:
   attackAnimationVariantCount: 7
   hitAnimationDuration: 0.35
   deathAnimationDuration: 0.55
+  rotateVisualToAim: 0
+  flipVisualToAim: 1
 --- !u!114 &4949189409389680253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,7 +172,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 97bd68fb6d57499409feca07be448418, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   controller: {fileID: 3293183136613438693}
   currentHP: 65
@@ -183,7 +189,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 540ee480476c50642878daacaeeb4f56, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ShadowExtractionSystem
   maxShadows: 1
   extractRange: 2
@@ -193,6 +199,57 @@ MonoBehaviour:
   progressRoot: {fileID: 0}
   progressFill: {fileID: 0}
   promptText: {fileID: 0}
+--- !u!114 &3401731368012154763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 813395625523567839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81d6fc497135c1b4d8fa71b3b38beb8e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::KnifeAuraAttack
+  cooldown: 0.32
+  damageMultiplier: 1.15
+  damageBonus: 3
+  projectileSpeed: 10
+  projectileRange: 7.5
+  maxPierceTargets: 2
+  projectileColliderRadius: 0.22
+  auraVisualScale: 0.85
+  spawnDistance: 0.65
+  spawnHeightOffset: 0.12
+  trailDistance: 0.28
+  trailScale: 1.05
+  attackAnimationDuration: 0.24
+  projectileFrameRate: 14
+  effectFrameRate: 18
+  projectileFrames: []
+  impactFrames: []
+  trailFrames: []
+--- !u!114 &7686394780747701529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 813395625523567839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a818d8dc92411aa3afb667f4bd50cc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::OrangeFireAbility
+  cooldown: 1.15
+  damageMultiplier: 1.45
+  damageBonus: 8
+  projectileSpeed: 8.5
+  projectileRange: 8.5
+  explosionRadius: 1.85
+  spawnDistance: 0.75
+  spawnHeightOffset: 0.14
+  attackAnimationDuration: 0.28
 --- !u!1 &8082568993375796977
 GameObject:
   m_ObjectHideFlags: 0

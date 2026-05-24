@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fca4479e0929eac4990b17972fab24de, type: 3}
+  m_Name: PoderNaranja
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  weaponName: Poder Naranja
+  weaponIcon: {fileID: 0}
+  damage: 18
+  fireRate: 1.1
+  maxAmmo: 45
+  projectileSpeed: 8.5
+  projectileRange: 8.5
+  isPiercing: 0
+  isExplosive: 1
+  weaponType: 1
+  fireSound: {fileID: 0}
+  projectilePrefab: {fileID: 2888628659319497578, guid: 301cb2dbc34748c42a35c303626af597, type: 3}
+  animationFrames: []
+  meleeRadius: 0.8
+  meleeDistance: 1.5
+  meleeArc: 120
+  knockbackForce: 0
+  spreadAngles: []
