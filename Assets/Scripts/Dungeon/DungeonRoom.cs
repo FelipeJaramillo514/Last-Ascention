@@ -6,8 +6,11 @@ using UnityEngine;
 public class DungeonRoom : MonoBehaviour
 {
     private const string DoorSpriteResourcePath = "DungeonDoors/door_sprite";
+    private const string SideDoorSpriteResourcePath = "DungeonDoors/sprite_puertas";
     private const int DoorSpriteRows = 4;
     private const int DoorSpriteColumns = 6;
+    private const int SideDoorSpriteRows = 4;
+    private const int SideDoorSpriteColumns = 6;
     private const float DoorSpritePixelsPerUnit = 160f;
     private const float DoorSpriteAnimationDuration = 0.42f;
     private const string DoorVisualChildName = "DoorSpriteVisual";
@@ -15,7 +18,9 @@ public class DungeonRoom : MonoBehaviour
     private const string EntryOrangePowerPickupName = "StartingOrangePower";
 
     private static Sprite[][] doorAnimationFrames;
+    private static Sprite[][] sideDoorAnimationFrames;
     private static bool doorAnimationLoadAttempted;
+    private static bool sideDoorAnimationLoadAttempted;
 
     [SerializeField] private RoomData data;
     [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
@@ -585,6 +590,11 @@ public class DungeonRoom : MonoBehaviour
 
     private Sprite[] GetDoorAnimationFrames(int doorIndex)
     {
+        if (doorIndex == 2 || doorIndex == 3)
+        {
+            return GetSideDoorAnimationFrames(doorIndex);
+        }
+
         EnsureDoorAnimationFrames();
         if (doorAnimationFrames == null || doorIndex < 0 || doorIndex >= doorAnimationFrames.Length)
         {
@@ -592,6 +602,23 @@ public class DungeonRoom : MonoBehaviour
         }
 
         return doorAnimationFrames[doorIndex];
+    }
+
+    private Sprite[] GetSideDoorAnimationFrames(int doorIndex)
+    {
+        EnsureSideDoorAnimationFrames();
+        if (sideDoorAnimationFrames == null)
+        {
+            return null;
+        }
+
+        int row = doorIndex == 2 ? 0 : 2;
+        if (row < 0 || row >= sideDoorAnimationFrames.Length)
+        {
+            return null;
+        }
+
+        return sideDoorAnimationFrames[row];
     }
 
     private static void EnsureDoorAnimationFrames()
@@ -614,25 +641,56 @@ public class DungeonRoom : MonoBehaviour
             return;
         }
 
+        doorAnimationFrames = SliceDoorSheet(texture, DoorSpriteRows, DoorSpriteColumns, false);
+    }
+
+    private static void EnsureSideDoorAnimationFrames()
+    {
+        if (sideDoorAnimationLoadAttempted)
+        {
+            return;
+        }
+
+        sideDoorAnimationLoadAttempted = true;
+        Texture2D texture = Resources.Load<Texture2D>(SideDoorSpriteResourcePath);
+        if (texture == null)
+        {
+            Sprite sourceSprite = Resources.Load<Sprite>(SideDoorSpriteResourcePath);
+            texture = sourceSprite != null ? sourceSprite.texture : null;
+        }
+
+        if (texture == null)
+        {
+            return;
+        }
+
+        sideDoorAnimationFrames = SliceDoorSheet(texture, SideDoorSpriteRows, SideDoorSpriteColumns, true);
+    }
+
+    private static Sprite[][] SliceDoorSheet(Texture2D texture, int rows, int columns, bool reverseFrames)
+    {
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
-        doorAnimationFrames = new Sprite[DoorSpriteRows][];
-        for (int row = 0; row < DoorSpriteRows; row++)
+        Sprite[][] frames = new Sprite[rows][];
+        for (int row = 0; row < rows; row++)
         {
-            doorAnimationFrames[row] = new Sprite[DoorSpriteColumns];
-            for (int column = 0; column < DoorSpriteColumns; column++)
+            frames[row] = new Sprite[columns];
+            for (int column = 0; column < columns; column++)
             {
-                int left = Mathf.RoundToInt(column * texture.width / (float)DoorSpriteColumns);
-                int right = Mathf.RoundToInt((column + 1) * texture.width / (float)DoorSpriteColumns);
-                int top = Mathf.RoundToInt(row * texture.height / (float)DoorSpriteRows);
-                int bottom = Mathf.RoundToInt((row + 1) * texture.height / (float)DoorSpriteRows);
+                int left = Mathf.RoundToInt(column * texture.width / (float)columns);
+                int right = Mathf.RoundToInt((column + 1) * texture.width / (float)columns);
+                int top = Mathf.RoundToInt(row * texture.height / (float)rows);
+                int bottom = Mathf.RoundToInt((row + 1) * texture.height / (float)rows);
                 int width = Mathf.Max(1, right - left);
                 int height = Mathf.Max(1, bottom - top);
                 int unityY = texture.height - bottom;
                 Rect rect = new Rect(left, unityY, width, height);
-                doorAnimationFrames[row][column] = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), DoorSpritePixelsPerUnit);
+                int targetColumn = reverseFrames ? columns - 1 - column : column;
+                frames[row][targetColumn] = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), DoorSpritePixelsPerUnit);
             }
         }
+
+        return frames;
     }
 
     private IEnumerator AnimateDoorSpriteRoutine(int doorIndex, Transform doorTransform, BoxCollider2D solidCollider, bool opening)
