@@ -67,7 +67,7 @@ public class CityHubBootstrapper : MonoBehaviour
             return;
         }
 
-        if (AnyPanelVisible())
+        if (AnyPanelVisible() || UIModalGate.IsBlockingInteraction)
         {
             promptText.gameObject.SetActive(false);
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
@@ -84,7 +84,7 @@ public class CityHubBootstrapper : MonoBehaviour
             promptText.text = "[E] Entrar";
         }
 
-        if (canInteract && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (canInteract && !UIModalGate.IsBlockingInteraction && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
             OpenBuilding(nearbyBuilding.BuildingType);
         }
@@ -282,7 +282,7 @@ public class CityHubBootstrapper : MonoBehaviour
         marketUI = marketUI != null ? marketUI : FindFirstObjectByType<MetaUpgradeShop>();
         if (marketUI == null)
         {
-            marketUI = gameObject.AddComponent<MetaUpgradeShop>();
+            Debug.LogError("[CityHubBootstrapper] Falta MetaUpgradeShop en escena. Ejecuta Last Ascention / Setup Modal UI Prefabs.");
         }
 
         CloseAllPanels();

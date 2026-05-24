@@ -7,7 +7,7 @@ using UnityEngine;
 public static class GoblinEnemySpriteSheetImporter
 {
     private const string SourceFileName = "gobling sprite.png";
-    private const string FrameFolder = "Assets/Art/Enemies/Goblin/Frames";
+    private const string FrameFolder = "Assets/Art/Characters/Enemies/Goblin/Frames";
     private const string ClipFolder = "Assets/Animations/Enemies";
     private const string ControllerPath = "Assets/Animations/Enemies/EnemyBase.controller";
     private const int CellSize = 64;
@@ -48,9 +48,10 @@ public static class GoblinEnemySpriteSheetImporter
             return;
         }
 
-        EnsureFolder("Assets/Art", "Enemies");
-        EnsureFolder("Assets/Art/Enemies", "Goblin");
-        EnsureFolder("Assets/Art/Enemies/Goblin", "Frames");
+        EnsureFolder("Assets/Art", "Characters");
+        EnsureFolder("Assets/Art/Characters", "Enemies");
+        EnsureFolder("Assets/Art/Characters/Enemies", "Goblin");
+        EnsureFolder("Assets/Art/Characters/Enemies/Goblin", "Frames");
         ClearGeneratedAssets();
 
         Texture2D sourceTexture = LoadTexture(sourcePath);

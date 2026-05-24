@@ -14,7 +14,10 @@ public class DungeonBuilder : MonoBehaviour
 {
     public static DungeonBuilder Instance { get; private set; }
 
-    [Header("Room Prefabs")]
+    [Header("Room Templates")]
+    [SerializeField] private RoomTemplateLibrary templateLibrary;
+
+    [Header("Room Prefabs (legacy fallback)")]
     [SerializeField] private GameObject[] normalRoomPrefabs;
     [SerializeField] private GameObject bossRoomPrefab;
     [SerializeField] private GameObject shopRoomPrefab;
@@ -443,6 +446,15 @@ public class DungeonBuilder : MonoBehaviour
 
     private GameObject SelectRoomPrefab(RoomType roomType, System.Random random)
     {
+        if (templateLibrary != null)
+        {
+            GameObject fromLibrary = templateLibrary.SelectPrefab(roomType, random);
+            if (fromLibrary != null)
+            {
+                return fromLibrary;
+            }
+        }
+
         if (roomType == RoomType.Entry)
         {
             return entryRoomPrefab;
@@ -456,6 +468,11 @@ public class DungeonBuilder : MonoBehaviour
         if (roomType == RoomType.Shop)
         {
             return shopRoomPrefab != null ? shopRoomPrefab : GetRandomNormalRoom(random);
+        }
+
+        if (roomType == RoomType.Secret)
+        {
+            return GetRandomNormalRoom(random);
         }
 
         return GetRandomNormalRoom(random);

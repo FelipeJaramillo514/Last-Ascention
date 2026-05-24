@@ -1,0 +1,23 @@
+Built from '6000.3/staging' branch; Version is '6000.3.11f1 (3000ef702840) revision 3145967'; Using compiler version '194234433'; Build Type 'Release'
+OS: 'Windows 10  (10.0.19045) 64bit Professional' Language: 'es' Physical Memory: 14284 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
+System  architecture: x64
+Process architecture: x64
+Date: 2026-05-24T14:36:46Z
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-David" at "2026-05-24T14:36:46.5866917Z"
+
+COMMAND LINE ARGUMENTS:
+C:\Program Files\Unity\Hub\Editor\6000.3.11f1\Editor\Unity.exe
+-batchmode
+-nographics
+-quit
+-projectPath
+D:\UProject\Last-Ascention
+-executeMethod
+ModalUIPrefabBuilder.SetupAll
+-logFile
+D:\UProject\Last-Ascention\modal-setup.log
+Successfully changed project path to: D:\UProject\Last-Ascention
+D:/UProject/Last-Ascention
+Exiting without the bug reporter. Application will terminate with return code 1

@@ -59,6 +59,11 @@ public class SystemPanelUI : MonoBehaviour
     public void ShowLevelUp(StatChanges changes)
     {
         EnsureUiExists();
+        if (UIModalGate.IsBlockingInteraction)
+        {
+            return;
+        }
+
         if (!changes.HasAnyChange)
         {
             return;

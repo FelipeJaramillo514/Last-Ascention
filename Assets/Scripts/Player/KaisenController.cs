@@ -23,6 +23,7 @@ public class KaisenController : MonoBehaviour
     [SerializeField] private float moveSpeedMultiplier = 1f;
     [SerializeField] private float attackDamageMultiplier = 1f;
     [SerializeField] private bool combatInputEnabled = true;
+    [SerializeField] private bool playerInputEnabled = true;
 
     [Header("Dodge")]
     [SerializeField] private float dodgeDuration = 0.3f;
@@ -77,6 +78,7 @@ public class KaisenController : MonoBehaviour
     }
     public bool IsDodgeReady { get { return !isDodging && Time.time >= nextDodgeAvailableTime; } }
     public SpriteRenderer VisualSprite { get { return spriteRenderer; } }
+    public bool IsPlayerInputEnabled => playerInputEnabled;
     private void Awake()
     {
         if (rb == null)
@@ -139,14 +141,32 @@ public class KaisenController : MonoBehaviour
 
     private void Update()
     {
-        ReadMovementInput();
-        UpdateAimDirection();
-        HandleActions();
+        if (playerInputEnabled)
+        {
+            ReadMovementInput();
+            UpdateAimDirection();
+            HandleActions();
+        }
+        else
+        {
+            moveInput = Vector2.zero;
+        }
+
         UpdateAnimatorParameters();
     }
 
     private void FixedUpdate()
     {
+        if (!playerInputEnabled)
+        {
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+            }
+
+            return;
+        }
+
         if (isDodging)
         {
             rb.MovePosition(rb.position + (dodgeDirection * dodgeSpeed * Time.fixedDeltaTime));
@@ -182,6 +202,19 @@ public class KaisenController : MonoBehaviour
     public void SetCombatInputEnabled(bool enabled)
     {
         combatInputEnabled = enabled;
+    }
+
+    public void SetPlayerInputEnabled(bool enabled)
+    {
+        playerInputEnabled = enabled;
+        if (!enabled)
+        {
+            moveInput = Vector2.zero;
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+            }
+        }
     }
 
     public void SetVisualTint(Color color)

@@ -369,9 +369,13 @@ public class RunManager : MonoBehaviour
         {
             runSummaryUI = FindFirstObjectByType<RunSummaryUI>();
         }
+
         if (runSummaryUI == null)
         {
-            runSummaryUI = gameObject.AddComponent<RunSummaryUI>();
+            Debug.LogError("[RunManager] Falta RunSummaryUI en escena. Ejecuta Last Ascention / Setup Modal UI Prefabs.");
+            summaryVisible = false;
+            ReturnToHub();
+            return;
         }
 
         runSummaryUI.Show(currentRunStats, () =>

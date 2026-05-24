@@ -7,7 +7,7 @@ using UnityEngine;
 public static class PlayerSpriteSheetImporter
 {
     private const string SourceFileName = "sprites.png";
-    private const string FrameFolder = "Assets/Art/Player/SungJinWoo/Frames";
+    private const string FrameFolder = "Assets/Art/Characters/Player/Kaisen/Frames";
     private const string ClipFolder = "Assets/Animations/Player";
     private const string ControllerPath = "Assets/Animations/KaisenPlayer.controller";
     private const string PlayerPrefabPath = "Assets/Prefabs/Player.prefab";
@@ -63,9 +63,10 @@ public static class PlayerSpriteSheetImporter
             return;
         }
 
-        EnsureFolder("Assets/Art", "Player");
-        EnsureFolder("Assets/Art/Player", "SungJinWoo");
-        EnsureFolder("Assets/Art/Player/SungJinWoo", "Frames");
+        EnsureFolder("Assets/Art", "Characters");
+        EnsureFolder("Assets/Art/Characters", "Player");
+        EnsureFolder("Assets/Art/Characters/Player", "Kaisen");
+        EnsureFolder("Assets/Art/Characters/Player/Kaisen", "Frames");
         EnsureFolder("Assets/Animations", "Player");
         ClearGeneratedAssets();
 

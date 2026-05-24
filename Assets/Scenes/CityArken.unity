@@ -119,6 +119,114 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &115717549
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6668156833877793021, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_Name
+      value: MetaUpgradeShop
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923795525064587156, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+--- !u!114 &115717550 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3208100823849936174, guid: 4bafcba6b6ea7b149a2746701fb5423c, type: 3}
+  m_PrefabInstance: {fileID: 115717549}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8abb8570ffc22c459240e920825e371, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MetaUpgradeShop
 --- !u!1 &343257399
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,7 +277,7 @@ MonoBehaviour:
   promptText: {fileID: 0}
   hospitalUI: {fileID: 0}
   associationUI: {fileID: 0}
-  marketUI: {fileID: 0}
+  marketUI: {fileID: 115717550}
 --- !u!1 &448031712
 GameObject:
   m_ObjectHideFlags: 0
@@ -775,6 +883,7 @@ MonoBehaviour:
   moveSpeedMultiplier: 1
   attackDamageMultiplier: 1
   combatInputEnabled: 1
+  playerInputEnabled: 1
   dodgeDuration: 0.3
   dodgeSpeed: 12
   dodgeInvulnerabilityWindow: 0.2
@@ -785,6 +894,9 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
+  attackAnimationVariantCount: 7
+  hitAnimationDuration: 0.35
+  deathAnimationDuration: 0.55
 --- !u!70 &1123684091
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -951,6 +1063,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 291b48b6a59b95c45a8b8823543acb71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder
+  templateLibrary: {fileID: 11400000, guid: 37b19058e94c9c045977b1eb2ad89cc9, type: 2}
   normalRoomPrefabs:
   - {fileID: 2258047537101889175, guid: b4bc1f6d7ac9f1545a71453b73a70fca, type: 3}
   - {fileID: 4652893642842718944, guid: 528638c039b8b5948915ce42311a132d, type: 3}
@@ -1070,8 +1183,8 @@ Camera:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1.0004548
-    height: 0.99946266
+    width: 0.610687
+    height: 0.7729469
   near clip plane: 0.1
   far clip plane: 100
   field of view: 40
@@ -1192,3 +1305,4 @@ SceneRoots:
   - {fileID: 1376629159}
   - {fileID: 448031725}
   - {fileID: 1123684093}
+  - {fileID: 115717549}

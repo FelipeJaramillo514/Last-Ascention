@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1bdb60b4f980884eb5f1d0f2f303d8c, type: 3}
+  m_Name: RoomTemplateLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::RoomTemplateLibrary
+  entryRoom: {fileID: 7803090510940491146, guid: 2cbb97e205e9b674c841902096d38c56, type: 3}
+  normalRooms:
+  - {fileID: 2258047537101889175, guid: b4bc1f6d7ac9f1545a71453b73a70fca, type: 3}
+  - {fileID: 4652893642842718944, guid: 528638c039b8b5948915ce42311a132d, type: 3}
+  - {fileID: 4030640461448464848, guid: 753a8ffe9294f7c45b64e9e75af545d6, type: 3}
+  bossRoom: {fileID: 4605967168884636926, guid: e4bb03645e143384b883327f2ed39a5a, type: 3}
+  shopRoom: {fileID: 6865008604222822674, guid: c9f3ea9b500a5b34cac8a8709f4d0f17, type: 3}
+  secretRoom: {fileID: 0}
