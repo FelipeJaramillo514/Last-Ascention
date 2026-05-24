@@ -15,7 +15,6 @@ public class KaisenController : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private WeaponManager weaponManager;
-    [SerializeField] private KnifeAuraAttack knifeAuraAttack;
 
     [Header("Stats")]
     [SerializeField] private KaisenStats stats = new KaisenStats();
@@ -120,11 +119,6 @@ public class KaisenController : MonoBehaviour
         if (weaponManager == null)
         {
             weaponManager = GetComponent<WeaponManager>();
-        }
-
-        if (knifeAuraAttack == null)
-        {
-            knifeAuraAttack = GetComponent<KnifeAuraAttack>();
         }
 
         ConfigurePhysicsBody();
@@ -333,16 +327,7 @@ public class KaisenController : MonoBehaviour
 
         if (attackPressed)
         {
-            if (weaponManager != null && weaponManager.TryFireActiveWeapon(aimDirection))
-            {
-                return;
-            }
-
-            if (knifeAuraAttack != null)
-            {
-                knifeAuraAttack.TryFire(aimDirection);
-                return;
-            }
+            weaponManager?.TryFireActiveWeapon(aimDirection);
         }
     }
 
@@ -477,7 +462,7 @@ public class KaisenController : MonoBehaviour
             hitAnimationRoutine = null;
         }
 
-        if (animator != null)
+        if (animator != null && animator.isInitialized && animator.runtimeAnimatorController != null)
         {
             animator.SetBool("IsAttacking", false);
             animator.SetBool("IsHit", false);
@@ -576,7 +561,6 @@ public class KaisenController : MonoBehaviour
         mainCamera = Camera.main;
         playerHealth = GetComponent<PlayerHealth>();
         weaponManager = GetComponent<WeaponManager>();
-        knifeAuraAttack = GetComponent<KnifeAuraAttack>();
         enemyLayer = LayerMask.GetMask("Enemy");
         ConfigurePhysicsBody();
     }

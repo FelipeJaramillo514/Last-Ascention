@@ -669,7 +669,6 @@ GameObject:
   - component: {fileID: 1123684089}
   - component: {fileID: 1123684088}
   - component: {fileID: 1123684087}
-  - component: {fileID: 1123684094}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -755,7 +754,6 @@ MonoBehaviour:
   mainCamera: {fileID: 2011769010}
   playerHealth: {fileID: 0}
   weaponManager: {fileID: 1123684087}
-  knifeAuraAttack: {fileID: 0}
   stats:
     systemLevel: 1
     strength: 5
@@ -872,35 +870,6 @@ Transform:
   - {fileID: 2011769015}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1123684094
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1123684086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81d6fc497135c1b4d8fa71b3b38beb8e, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::KnifeAuraAttack
-  cooldown: 0.32
-  damageMultiplier: 1.15
-  damageBonus: 3
-  projectileSpeed: 10
-  projectileRange: 7.5
-  maxPierceTargets: 2
-  projectileColliderRadius: 0.22
-  spawnDistance: 0.65
-  spawnHeightOffset: 0.12
-  trailDistance: 0.28
-  trailScale: 1.05
-  attackAnimationDuration: 0.24
-  projectileFrameRate: 14
-  effectFrameRate: 18
-  projectileFrames: []
-  impactFrames: []
-  trailFrames: []
 --- !u!1 &1376629152
 GameObject:
   m_ObjectHideFlags: 0
