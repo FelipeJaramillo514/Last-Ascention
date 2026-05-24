@@ -8,6 +8,7 @@ public class EditorDebugOverlay : MonoBehaviour
 
     private float smoothedDeltaTime;
     private bool godMode;
+    private bool showOverlay;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
@@ -46,6 +47,11 @@ public class EditorDebugOverlay : MonoBehaviour
             ToggleGodMode();
         }
 
+        if (Keyboard.current.f9Key.wasPressedThisFrame)
+        {
+            showOverlay = !showOverlay;
+        }
+
         if (Keyboard.current.f2Key.wasPressedThisFrame && SystemManager.Instance != null)
         {
             SystemManager.Instance.DebugForceLevelUp();
@@ -70,6 +76,11 @@ public class EditorDebugOverlay : MonoBehaviour
 
     private void OnGUI()
     {
+        if (!showOverlay)
+        {
+            return;
+        }
+
         GUI.color = Color.white;
         float fps = smoothedDeltaTime > 0.0001f ? 1f / smoothedDeltaTime : 0f;
         DungeonBuilder dungeon = DungeonBuilder.Instance;

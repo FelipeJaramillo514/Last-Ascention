@@ -167,19 +167,36 @@ public class ResourcePanelUI : MonoBehaviour
     private Canvas FindOverlayCanvas()
     {
         Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+        Canvas fallback = null;
         for (int i = 0; i < canvases.Length; i++)
         {
-            if (canvases[i] != null && canvases[i].renderMode == RenderMode.ScreenSpaceOverlay)
+            Canvas canvas = canvases[i];
+            if (canvas == null || canvas.renderMode != RenderMode.ScreenSpaceOverlay)
             {
-                return canvases[i];
+                continue;
+            }
+
+            if (canvas.name == "HUDCanvas")
+            {
+                return canvas;
+            }
+
+            if (fallback == null)
+            {
+                fallback = canvas.rootCanvas != null ? canvas.rootCanvas : canvas;
             }
         }
 
+        if (fallback != null)
+        {
+            return fallback;
+        }
+
         GameObject canvasObject = new GameObject("HUDCanvas", typeof(RectTransform));
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        Canvas newCanvas = canvasObject.AddComponent<Canvas>();
+        newCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         canvasObject.AddComponent<GraphicRaycaster>();
-        return canvas;
+        return newCanvas;
     }
 }

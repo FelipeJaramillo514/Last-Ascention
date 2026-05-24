@@ -58,8 +58,8 @@ public class MissionPanelUI : MonoBehaviour
         float targetSlide = isExpanded ? 1f : 0f;
         currentSlide = Mathf.MoveTowards(currentSlide, targetSlide, Time.unscaledDeltaTime * 5f);
         panelCanvasGroup.alpha = Mathf.Lerp(0.35f, 1f, currentSlide);
-        panelRoot.anchoredPosition = new Vector2(Mathf.Lerp(-278f, 0f, currentSlide), -96f);
-        handleRoot.anchoredPosition = new Vector2(Mathf.Lerp(12f, 306f, currentSlide), -160f);
+        panelRoot.anchoredPosition = new Vector2(Mathf.Lerp(-308f, 16f, currentSlide), -304f);
+        handleRoot.anchoredPosition = new Vector2(Mathf.Lerp(16f, 316f, currentSlide), -304f);
     }
 
     private void AttachMissionSystemIfNeeded()
@@ -162,7 +162,7 @@ public class MissionPanelUI : MonoBehaviour
         overlayRect.offsetMin = Vector2.zero;
         overlayRect.offsetMax = Vector2.zero;
 
-        handleRoot = EnsureRect(overlay, "Handle", new Vector2(12f, -160f), new Vector2(92f, 28f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+        handleRoot = EnsureRect(overlay, "Handle", new Vector2(16f, -304f), new Vector2(118f, 28f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
         Image handleImage = handleRoot.GetComponent<Image>();
         if (handleImage == null)
         {
@@ -180,7 +180,7 @@ public class MissionPanelUI : MonoBehaviour
         Text handleText = EnsureText(handleRoot, "Text", 13, TextAnchor.MiddleCenter, Color.white, Vector2.zero, handleRoot.sizeDelta);
         handleText.text = "[TAB] Misiones";
 
-        panelRoot = EnsureRect(overlay, "MissionPanel", new Vector2(-278f, -96f), new Vector2(292f, 236f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+        panelRoot = EnsureRect(overlay, "MissionPanel", new Vector2(-308f, -304f), new Vector2(292f, 236f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
         Image panelImage = panelRoot.GetComponent<Image>();
         if (panelImage == null)
         {
@@ -241,20 +241,37 @@ public class MissionPanelUI : MonoBehaviour
     private Canvas FindOverlayCanvas()
     {
         Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+        Canvas fallback = null;
         for (int i = 0; i < canvases.Length; i++)
         {
-            if (canvases[i] != null && canvases[i].renderMode == RenderMode.ScreenSpaceOverlay)
+            Canvas canvas = canvases[i];
+            if (canvas == null || canvas.renderMode != RenderMode.ScreenSpaceOverlay)
             {
-                return canvases[i];
+                continue;
+            }
+
+            if (canvas.name == "HUDCanvas")
+            {
+                return canvas;
+            }
+
+            if (fallback == null)
+            {
+                fallback = canvas.rootCanvas != null ? canvas.rootCanvas : canvas;
             }
         }
 
+        if (fallback != null)
+        {
+            return fallback;
+        }
+
         GameObject canvasObject = new GameObject("HUDCanvas", typeof(RectTransform));
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        Canvas newCanvas = canvasObject.AddComponent<Canvas>();
+        newCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         canvasObject.AddComponent<GraphicRaycaster>();
-        return canvas;
+        return newCanvas;
     }
 
     private RectTransform EnsureRect(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot)
