@@ -53,6 +53,8 @@ public class MainMenuController : MonoBehaviour
     private AudioClip clickClip;
     private MainMenuButtonFeedback lastHighlightedButton;
     private Sprite cachedWhiteSprite;
+    private Sprite cachedMenuBackdropSprite;
+    private static Material sharedMenuParticleMaterial;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
@@ -266,10 +268,10 @@ public class MainMenuController : MonoBehaviour
 
         ApplyMenuLayout();
 
-        SetButtonPalette(continueButton, new Color(0f, 0.75f, 1f, 0.92f), Color.white);
-        SetButtonPalette(newGameButton, hasSave ? new Color(0.53f, 0.53f, 0.53f, 0.92f) : Color.white, hasSave ? Color.white : Color.black);
-        SetButtonPalette(optionsButton, new Color(0.16f, 0.16f, 0.18f, 0.92f), Color.white);
-        SetButtonPalette(exitButton, new Color(0.16f, 0.16f, 0.18f, 0.92f), Color.white);
+        SetButtonPalette(continueButton, new Color(0.05f, 0.5f, 0.72f, 0.94f), Color.white);
+        SetButtonPalette(newGameButton, hasSave ? new Color(0.33f, 0.34f, 0.38f, 0.94f) : new Color(1f, 0.72f, 0.22f, 0.96f), hasSave ? Color.white : new Color(0.08f, 0.045f, 0.018f, 1f));
+        SetButtonPalette(optionsButton, new Color(0.05f, 0.07f, 0.105f, 0.94f), Color.white);
+        SetButtonPalette(exitButton, new Color(0.11f, 0.055f, 0.06f, 0.94f), Color.white);
 
         Button defaultButton = hasSave && continueButton != null && continueButton.gameObject.activeInHierarchy ? continueButton : newGameButton;
         if (defaultButton != null && EventSystem.current != null)
@@ -290,13 +292,14 @@ public class MainMenuController : MonoBehaviour
             menuCamera.orthographic = true;
             menuCamera.orthographicSize = 5f;
             menuCamera.transform.position = new Vector3(0f, 0f, -10f);
-            menuCamera.backgroundColor = new Color32(5, 5, 16, 255);
+            menuCamera.backgroundColor = new Color32(7, 8, 16, 255);
         }
 
         if (panelBackgroundImage != null)
         {
-            panelBackgroundImage.sprite = GetWhiteSprite();
-            panelBackgroundImage.color = new Color(0f, 0f, 0f, 0.15f);
+            panelBackgroundImage.sprite = CreateMenuBackdropSprite();
+            panelBackgroundImage.color = Color.white;
+            panelBackgroundImage.raycastTarget = false;
         }
 
         ConfigureBackgroundSprites();
@@ -365,6 +368,7 @@ public class MainMenuController : MonoBehaviour
             ParticleSystemRenderer renderer = crackParticles.GetComponent<ParticleSystemRenderer>();
             renderer.sortingLayerName = "Background";
             renderer.sortingOrder = 4;
+            renderer.material = GetMenuParticleMaterial();
 
             if (!crackParticles.isPlaying)
             {
@@ -387,23 +391,23 @@ public class MainMenuController : MonoBehaviour
         if (titleText != null)
         {
             titleText.font = fontAsset;
-            titleText.text = "KAISEN";
-            titleText.fontSize = 88f;
-            titleText.color = Color.white;
+            titleText.text = "LAST ASCENSION";
+            titleText.fontSize = 76f;
+            titleText.color = new Color(1f, 0.94f, 0.76f, 1f);
             titleTargetPosition = titleText.rectTransform.anchoredPosition;
             titleText.rectTransform.anchoredPosition = titleTargetPosition + Vector2.up * 30f;
-            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.alignment = TextAlignmentOptions.Left;
             SetTextAlpha(titleText, 0f);
-            ApplyOutline(titleText, new Color32(0, 191, 255, 255), 0.3f);
+            ApplyOutline(titleText, new Color32(255, 126, 30, 255), 0.23f);
         }
 
         if (subtitleText != null)
         {
             subtitleText.font = fontAsset;
-            subtitleText.text = "EL ASCENSO DEL ULTIMO CAZADOR";
-            subtitleText.fontSize = 16f;
+            subtitleText.text = "SISTEMA DESPERTADO // ELIGE TU ASCENSO";
+            subtitleText.fontSize = 17f;
             subtitleText.color = new Color32(128, 216, 255, 255);
-            subtitleText.alignment = TextAlignmentOptions.Center;
+            subtitleText.alignment = TextAlignmentOptions.Left;
             subtitleText.maxVisibleCharacters = 0;
         }
     }
@@ -422,37 +426,37 @@ public class MainMenuController : MonoBehaviour
 
         if (titlePanel != null)
         {
-            SetRectTransform(titlePanel, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(920f, 210f));
+            SetRectTransform(titlePanel, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(56f, -58f), new Vector2(760f, 210f));
         }
 
         if (titleText != null)
         {
-            SetRectTransform(titleText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 18f), new Vector2(820f, 96f));
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.fontSize = 88f;
+            SetRectTransform(titleText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 28f), new Vector2(720f, 96f));
+            titleText.alignment = TextAlignmentOptions.Left;
+            titleText.fontSize = 76f;
             titleTargetPosition = titleText.rectTransform.anchoredPosition;
         }
 
         if (subtitleText != null)
         {
-            SetRectTransform(subtitleText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -44f), new Vector2(860f, 30f));
-            subtitleText.alignment = TextAlignmentOptions.Center;
-            subtitleText.fontSize = 16f;
+            SetRectTransform(subtitleText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(4f, -42f), new Vector2(690f, 30f));
+            subtitleText.alignment = TextAlignmentOptions.Left;
+            subtitleText.fontSize = 17f;
         }
 
         if (scanlineRect != null)
         {
-            SetRectTransform(scanlineRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 2f));
+            SetRectTransform(scanlineRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, -78f), new Vector2(700f, 3f));
         }
 
         if (buttonsPanel != null)
         {
-            SetRectTransform(buttonsPanel, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -255f), new Vector2(320f, hasSave ? 250f : 180f));
+            SetRectTransform(buttonsPanel, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(74f, -300f), new Vector2(374f, hasSave ? 288f : 218f));
         }
 
-        float buttonWidth = 300f;
-        float buttonHeight = 44f;
-        float spacing = 58f;
+        float buttonWidth = 340f;
+        float buttonHeight = 54f;
+        float spacing = 66f;
         if (hasSave)
         {
             ConfigureButtonLayout(continueButton, new Vector2(0f, 0f), buttonWidth, buttonHeight, false);
@@ -472,16 +476,18 @@ public class MainMenuController : MonoBehaviour
             RectTransform saveInfoRect = saveInfoPanel.GetComponent<RectTransform>();
             if (saveInfoRect != null)
             {
-                SetRectTransform(saveInfoRect, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(36f, 36f), new Vector2(300f, 140f));
+                SetRectTransform(saveInfoRect, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-42f, 42f), new Vector2(370f, 152f));
             }
         }
 
         if (saveInfoText != null)
         {
-            SetRectTransform(saveInfoText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(270f, 120f));
+            SetRectTransform(saveInfoText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(330f, 126f));
             saveInfoText.alignment = TextAlignmentOptions.TopLeft;
             saveInfoText.fontSize = 14f;
         }
+
+        ApplyMenuFrames();
     }
 
     private void ConfigureButtonLayout(Button button, Vector2 anchoredPosition, float width, float height, bool showSubLabel)
@@ -503,9 +509,9 @@ public class MainMenuController : MonoBehaviour
             TextMeshProUGUI label = labelTransform.GetComponent<TextMeshProUGUI>();
             if (label != null)
             {
-                SetRectTransform(label.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), showSubLabel ? new Vector2(0f, 8f) : Vector2.zero, new Vector2(250f, showSubLabel ? 20f : 28f));
-                label.alignment = TextAlignmentOptions.Center;
-                label.fontSize = 20f;
+                SetRectTransform(label.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), showSubLabel ? new Vector2(58f, 8f) : new Vector2(58f, 0f), new Vector2(260f, showSubLabel ? 20f : 28f));
+                label.alignment = TextAlignmentOptions.Left;
+                label.fontSize = 21f;
             }
         }
 
@@ -516,7 +522,7 @@ public class MainMenuController : MonoBehaviour
             if (cursorText != null)
             {
                 cursorText.text = ">";
-                SetRectTransform(cursorText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), showSubLabel ? new Vector2(-122f, 8f) : new Vector2(-122f, 0f), new Vector2(24f, 24f));
+                SetRectTransform(cursorText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), showSubLabel ? new Vector2(18f, 8f) : new Vector2(18f, 0f), new Vector2(24f, 24f));
                 cursorText.alignment = TextAlignmentOptions.Center;
                 cursorText.fontSize = 20f;
             }
@@ -524,8 +530,8 @@ public class MainMenuController : MonoBehaviour
 
         if (button == newGameButton && newGameSubLabel != null)
         {
-            SetRectTransform(newGameSubLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -12f), new Vector2(250f, 14f));
-            newGameSubLabel.alignment = TextAlignmentOptions.Center;
+            SetRectTransform(newGameSubLabel.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(58f, -13f), new Vector2(250f, 14f));
+            newGameSubLabel.alignment = TextAlignmentOptions.Left;
             newGameSubLabel.fontSize = 10f;
         }
     }
@@ -806,7 +812,7 @@ public class MainMenuController : MonoBehaviour
         if (feedback != null)
         {
             feedback.Initialize(this);
-            feedback.ConfigureSizing(20f, 24f);
+            feedback.ConfigureSizing(21f, 25f);
             button.onClick.AddListener(feedback.PlayClickFeedback);
             buttonFeedbacks.Add(feedback);
         }
@@ -830,6 +836,120 @@ public class MainMenuController : MonoBehaviour
         {
             feedback.SetVisualColors(backgroundColor, textColor);
         }
+
+        ApplyButtonChrome(button, backgroundColor);
+    }
+
+    private void ApplyMenuFrames()
+    {
+        ApplyPanelChrome(titlePanel, new Color(0.012f, 0.018f, 0.028f, 0.66f), new Color(1f, 0.52f, 0.16f, 0.76f));
+        ApplyPanelChrome(buttonsPanel, new Color(0.015f, 0.021f, 0.032f, 0.72f), new Color(0.2f, 0.8f, 1f, 0.56f));
+
+        if (saveInfoPanel != null)
+        {
+            ApplyPanelChrome(saveInfoPanel.GetComponent<RectTransform>(), new Color(0.016f, 0.024f, 0.036f, 0.82f), new Color(0.55f, 0.84f, 1f, 0.5f));
+        }
+
+        if (optionsPanel != null)
+        {
+            RectTransform optionsRect = optionsPanel.GetComponent<RectTransform>();
+            ApplyPanelChrome(optionsRect, new Color(0f, 0f, 0f, 0.62f), new Color(0.38f, 0.78f, 1f, 0.35f));
+        }
+
+        if (confirmationCard != null)
+        {
+            ApplyPanelChrome(confirmationCard, new Color(0.035f, 0.025f, 0.028f, 0.94f), new Color(1f, 0.52f, 0.2f, 0.8f));
+        }
+    }
+
+    private void ApplyPanelChrome(RectTransform rect, Color backgroundColor, Color outlineColor)
+    {
+        if (rect == null)
+        {
+            return;
+        }
+
+        Image image = rect.GetComponent<Image>();
+        if (image == null)
+        {
+            image = rect.gameObject.AddComponent<Image>();
+        }
+
+        image.sprite = GetWhiteSprite();
+        image.color = backgroundColor;
+        image.raycastTarget = false;
+
+        Outline outline = rect.GetComponent<Outline>();
+        if (outline != null)
+        {
+            outline.enabled = false;
+        }
+
+        SetPanelLine(rect, "BorderTop", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, 0f), new Vector2(0f, 2f), outlineColor);
+        SetPanelLine(rect, "BorderBottom", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 0f), new Vector2(0f, 2f), new Color(outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a * 0.42f));
+        SetPanelLine(rect, "BorderLeft", new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(2f, 0f), outlineColor);
+    }
+
+    private void SetPanelLine(RectTransform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta, Color color)
+    {
+        RectTransform line = EnsureButtonChildImage(parent, name, anchorMin, anchorMax, pivot, anchoredPosition, sizeDelta);
+        line.GetComponent<Image>().color = color;
+    }
+
+    private void ApplyButtonChrome(Button button, Color accentColor)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        Image image = button.GetComponent<Image>();
+        if (image != null)
+        {
+            image.sprite = GetWhiteSprite();
+        }
+
+        Outline outline = button.GetComponent<Outline>();
+        if (outline == null)
+        {
+            outline = button.gameObject.AddComponent<Outline>();
+        }
+
+        outline.effectColor = new Color(0f, 0f, 0f, 0.86f);
+        outline.effectDistance = new Vector2(2f, -2f);
+
+        RectTransform accent = EnsureButtonChildImage(button.transform, "Accent", new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(5f, 0f));
+        Image accentImage = accent.GetComponent<Image>();
+        accentImage.color = new Color(Mathf.Clamp01(accentColor.r + 0.15f), Mathf.Clamp01(accentColor.g + 0.15f), Mathf.Clamp01(accentColor.b + 0.15f), 1f);
+
+        RectTransform topLine = EnsureButtonChildImage(button.transform, "TopLine", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(0f, 2f));
+        Image topLineImage = topLine.GetComponent<Image>();
+        topLineImage.color = new Color(1f, 1f, 1f, 0.18f);
+    }
+
+    private RectTransform EnsureButtonChildImage(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
+    {
+        Transform target = parent.Find(name);
+        if (target == null)
+        {
+            GameObject child = new GameObject(name, typeof(RectTransform), typeof(Image));
+            target = child.transform;
+            target.SetParent(parent, false);
+        }
+
+        target.SetAsFirstSibling();
+
+        Image image = target.GetComponent<Image>();
+        image.sprite = GetWhiteSprite();
+        image.raycastTarget = false;
+
+        RectTransform rect = image.rectTransform;
+        rect.anchorMin = anchorMin;
+        rect.anchorMax = anchorMax;
+        rect.pivot = pivot;
+        rect.anchoredPosition = anchoredPosition;
+        rect.sizeDelta = sizeDelta;
+        return rect;
     }
 
     private void SyncAudioSliders()
@@ -1099,6 +1219,122 @@ public class MainMenuController : MonoBehaviour
         }
 
         return cachedWhiteSprite;
+    }
+
+    private Sprite CreateMenuBackdropSprite()
+    {
+        if (cachedMenuBackdropSprite != null)
+        {
+            return cachedMenuBackdropSprite;
+        }
+
+        Texture2D texture = new Texture2D(512, 288, TextureFormat.RGBA32, false);
+        texture.filterMode = FilterMode.Bilinear;
+        Vector2 glowCenter = new Vector2(texture.width * 0.66f, texture.height * 0.56f);
+        float maxGlowDistance = texture.width * 0.78f;
+
+        for (int y = 0; y < texture.height; y++)
+        {
+            float vertical = y / (float)(texture.height - 1);
+            Color baseColor = Color.Lerp(new Color32(6, 7, 15, 255), new Color32(18, 23, 34, 255), vertical);
+            baseColor = Color.Lerp(baseColor, new Color32(7, 8, 13, 255), Mathf.Clamp01((vertical - 0.58f) * 2.4f));
+
+            for (int x = 0; x < texture.width; x++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), glowCenter) / maxGlowDistance;
+                float glow = Mathf.Clamp01(1f - distance);
+                Color cyanGlow = new Color(0.02f, 0.48f, 0.62f, 1f) * (glow * 0.34f);
+                Color emberGlow = new Color(0.75f, 0.26f, 0.05f, 1f) * (Mathf.Pow(glow, 3f) * 0.38f);
+                texture.SetPixel(x, y, baseColor + cyanGlow + emberGlow);
+            }
+        }
+
+        for (int i = 0; i < 34; i++)
+        {
+            int x = Mathf.RoundToInt(Mathf.Lerp(0f, texture.width - 1f, i / 33f));
+            int roof = 26 + Mathf.RoundToInt(Mathf.PerlinNoise(i * 0.31f, 0.41f) * 42f);
+            int width = 9 + Mathf.RoundToInt(Mathf.PerlinNoise(i * 0.2f, 0.7f) * 15f);
+            Color towerColor = i % 4 == 0 ? new Color32(11, 18, 26, 235) : new Color32(6, 10, 17, 245);
+
+            for (int tx = Mathf.Max(0, x - width); tx < Mathf.Min(texture.width, x + width); tx++)
+            {
+                for (int ty = 0; ty < roof; ty++)
+                {
+                    texture.SetPixel(tx, ty, towerColor);
+                }
+            }
+
+            if (i % 3 == 0)
+            {
+                for (int ty = 8; ty < roof - 4; ty += 12)
+                {
+                    int windowX = Mathf.Clamp(x, 0, texture.width - 1);
+                    texture.SetPixel(windowX, ty, new Color32(49, 175, 202, 180));
+                    if (windowX + 1 < texture.width)
+                    {
+                        texture.SetPixel(windowX + 1, ty, new Color32(49, 175, 202, 130));
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < 7; i++)
+        {
+            int startX = 42 + (i * 67);
+            int startY = 205 - (i % 3) * 16;
+            Color crackColor = i % 2 == 0 ? new Color32(255, 136, 38, 190) : new Color32(75, 226, 255, 165);
+            for (int step = 0; step < 94; step++)
+            {
+                int x = startX + step;
+                int y = startY - Mathf.RoundToInt(step * (0.42f + (i % 2) * 0.12f)) + Mathf.RoundToInt(Mathf.Sin(step * 0.23f + i) * 4f);
+                if (x < 1 || x >= texture.width - 1 || y < 1 || y >= texture.height - 1)
+                {
+                    continue;
+                }
+
+                texture.SetPixel(x, y, crackColor);
+                texture.SetPixel(x, y - 1, new Color(crackColor.r, crackColor.g, crackColor.b, 0.42f));
+                if (step % 13 == 0)
+                {
+                    texture.SetPixel(x + 1, y + 1, crackColor);
+                }
+            }
+        }
+
+        texture.Apply();
+        cachedMenuBackdropSprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100f);
+        return cachedMenuBackdropSprite;
+    }
+
+    private static Material GetMenuParticleMaterial()
+    {
+        if (sharedMenuParticleMaterial != null)
+        {
+            return sharedMenuParticleMaterial;
+        }
+
+        Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+        if (shader == null)
+        {
+            shader = Shader.Find("Sprites/Default");
+        }
+
+        if (shader == null)
+        {
+            shader = Shader.Find("Particles/Standard Unlit");
+        }
+
+        if (shader == null)
+        {
+            return null;
+        }
+
+        sharedMenuParticleMaterial = new Material(shader)
+        {
+            name = "RuntimeMenuParticleUnlit",
+            hideFlags = HideFlags.DontSave
+        };
+        return sharedMenuParticleMaterial;
     }
 
     private Sprite CreateSkySprite()

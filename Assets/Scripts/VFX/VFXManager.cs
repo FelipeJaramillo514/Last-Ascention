@@ -11,6 +11,7 @@ public class VFXManager : MonoBehaviour
 
     private readonly Queue<ParticleSystem> hitPool = new Queue<ParticleSystem>();
     private readonly List<ParticleSystem> allHitEffects = new List<ParticleSystem>();
+    private static Material sharedParticleMaterial;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
@@ -243,6 +244,7 @@ public class VFXManager : MonoBehaviour
         renderer.renderMode = ParticleSystemRenderMode.Billboard;
         renderer.sortingLayerName = "VFX";
         renderer.sortingOrder = 15;
+        renderer.material = GetParticleMaterial();
         return particleSystem;
     }
 
@@ -264,7 +266,9 @@ public class VFXManager : MonoBehaviour
         GameObject effectObject = new GameObject(objectName);
         effectObject.transform.position = position;
         ParticleSystem particleSystem = effectObject.AddComponent<ParticleSystem>();
+        particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         ParticleSystem.MainModule main = particleSystem.main;
+        main.playOnAwake = false;
         main.duration = lifetime;
         main.loop = false;
         main.startLifetime = lifetime;
@@ -292,8 +296,10 @@ public class VFXManager : MonoBehaviour
         colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
 
         ParticleSystemRenderer renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
+        renderer.renderMode = ParticleSystemRenderMode.Billboard;
         renderer.sortingLayerName = "VFX";
         renderer.sortingOrder = 18;
+        renderer.material = GetParticleMaterial();
 
         particleSystem.Play(true);
         return particleSystem;
@@ -315,7 +321,9 @@ public class VFXManager : MonoBehaviour
         GameObject effectObject = new GameObject("ShadowExtractionTrail");
         effectObject.transform.position = startPosition;
         ParticleSystem particleSystem = effectObject.AddComponent<ParticleSystem>();
+        particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         ParticleSystem.MainModule main = particleSystem.main;
+        main.playOnAwake = false;
         main.duration = duration;
         main.loop = true;
         main.startLifetime = 0.45f;
@@ -344,8 +352,10 @@ public class VFXManager : MonoBehaviour
         velocity.y = new ParticleSystem.MinMaxCurve(0.4f);
 
         ParticleSystemRenderer renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
+        renderer.renderMode = ParticleSystemRenderMode.Billboard;
         renderer.sortingLayerName = "VFX";
         renderer.sortingOrder = 16;
+        renderer.material = GetParticleMaterial();
 
         particleSystem.Play(true);
         float elapsed = 0f;
@@ -422,5 +432,36 @@ public class VFXManager : MonoBehaviour
         }
 
         Destroy(waveObject);
+    }
+
+    private static Material GetParticleMaterial()
+    {
+        if (sharedParticleMaterial != null)
+        {
+            return sharedParticleMaterial;
+        }
+
+        Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+        if (shader == null)
+        {
+            shader = Shader.Find("Sprites/Default");
+        }
+
+        if (shader == null)
+        {
+            shader = Shader.Find("Particles/Standard Unlit");
+        }
+
+        if (shader == null)
+        {
+            return null;
+        }
+
+        sharedParticleMaterial = new Material(shader)
+        {
+            name = "RuntimeParticleUnlit",
+            hideFlags = HideFlags.DontSave
+        };
+        return sharedParticleMaterial;
     }
 }

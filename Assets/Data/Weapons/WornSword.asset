@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fca4479e0929eac4990b17972fab24de, type: 3}
   m_Name: WornSword
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  weaponName: Espada Desgastada
+  weaponName: Cuchillo Desgastado
   weaponIcon: {fileID: 21300000, guid: 6a5dc8bf2cf264c40ab5718006402a1e, type: 3}
-  damage: 0
-  fireRate: 2
+  damage: 9
+  fireRate: 2.2
   maxAmmo: -1
   projectileSpeed: 0
   projectileRange: 1.5
@@ -26,8 +26,8 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   animationFrames:
   - {fileID: 21300000, guid: 6a5dc8bf2cf264c40ab5718006402a1e, type: 3}
-  meleeRadius: 0.8
-  meleeDistance: 1.5
-  meleeArc: 120
-  knockbackForce: 0
+  meleeRadius: 0.65
+  meleeDistance: 0.9
+  meleeArc: 95
+  knockbackForce: 1.1
   spreadAngles: []

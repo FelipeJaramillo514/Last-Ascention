@@ -48,6 +48,7 @@ public class SceneTransitionManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         EnsureUi();
+        DisableDuplicateTransitionCanvases();
         FadeOut(0.5f);
     }
 
@@ -168,6 +169,31 @@ public class SceneTransitionManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(overlayCanvas.gameObject);
+    }
+
+    private void DisableDuplicateTransitionCanvases()
+    {
+        Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+        for (int i = 0; i < canvases.Length; i++)
+        {
+            Canvas canvas = canvases[i];
+            if (canvas == null || canvas == overlayCanvas || canvas.name != "Canvas_Transition")
+            {
+                continue;
+            }
+
+            Transform fadeTransform = canvas.transform.Find("Image_Fade");
+            Image duplicateFade = fadeTransform != null ? fadeTransform.GetComponent<Image>() : null;
+            if (duplicateFade != null)
+            {
+                Color color = duplicateFade.color;
+                color.a = 0f;
+                duplicateFade.color = color;
+                duplicateFade.raycastTarget = false;
+            }
+
+            canvas.gameObject.SetActive(false);
+        }
     }
 
     private bool AdoptSceneFadeCanvas()
