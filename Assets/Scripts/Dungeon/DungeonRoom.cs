@@ -14,11 +14,13 @@ public class DungeonRoom : MonoBehaviour
     private const float DoorSpritePixelsPerUnit = 160f;
     private const float DoorSpriteAnimationDuration = 0.42f;
     private const string DoorVisualChildName = "DoorSpriteVisual";
+    private const string SealedGapVisualChildName = "SealedGapFill";
     private const string EntryOrangePowerResourcePath = "Weapons/PoderNaranja";
     private const string EntryOrangePowerPickupName = "StartingOrangePower";
 
     private static Sprite[][] doorAnimationFrames;
     private static Sprite[][] sideDoorAnimationFrames;
+    private static Sprite sealedGapSprite;
     private static bool doorAnimationLoadAttempted;
     private static bool sideDoorAnimationLoadAttempted;
 
@@ -123,16 +125,53 @@ public class DungeonRoom : MonoBehaviour
                 continue;
             }
 
-            doorObjects[i].SetActive(activeDoors[i]);
+            doorObjects[i].SetActive(true);
             DoorTrigger trigger = doorObjects[i].GetComponentInChildren<DoorTrigger>(true);
             if (trigger != null)
             {
                 trigger.gameObject.SetActive(activeDoors[i]);
                 trigger.SetTraversalEnabled(activeDoors[i]);
             }
+
+            if (!activeDoors[i])
+            {
+                SealInactiveDoor(i);
+            }
+            else
+            {
+                SetSealedGapVisualVisible(i, false);
+            }
         }
 
         SetDoorsOpenImmediate(true);
+    }
+
+    private void SealInactiveDoor(int doorIndex)
+    {
+        if (doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return;
+        }
+
+        GameObject doorObject = doorObjects[doorIndex];
+        doorObject.transform.localPosition = closedDoorLocalPositions[doorIndex];
+
+        BoxCollider2D solidCollider = doorObject.GetComponent<BoxCollider2D>();
+        if (solidCollider != null)
+        {
+            solidCollider.enabled = true;
+            solidCollider.isTrigger = false;
+        }
+
+        DoorTrigger trigger = doorObject.GetComponentInChildren<DoorTrigger>(true);
+        if (trigger != null)
+        {
+            trigger.SetTraversalEnabled(false);
+            trigger.gameObject.SetActive(false);
+        }
+
+        SetDoorSpriteFrame(doorIndex, false);
+        SetSealedGapVisualVisible(doorIndex, true);
     }
 
     public void ConfigureDoorLink(int doorIndex, DungeonRoom destinationRoom, int destinationDoorIndex)
@@ -796,6 +835,95 @@ public class DungeonRoom : MonoBehaviour
         return renderer;
     }
 
+    private void SetSealedGapVisualVisible(int doorIndex, bool visible)
+    {
+        SpriteRenderer renderer = GetSealedGapVisualRenderer(doorIndex, visible);
+        if (renderer == null)
+        {
+            return;
+        }
+
+        renderer.enabled = visible;
+        if (visible)
+        {
+            ApplySealedGapVisualLayout(doorIndex, renderer);
+        }
+    }
+
+    private SpriteRenderer GetSealedGapVisualRenderer(int doorIndex, bool create)
+    {
+        if (doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return null;
+        }
+
+        Transform doorTransform = doorObjects[doorIndex].transform;
+        Transform visualTransform = doorTransform.Find(SealedGapVisualChildName);
+        if (visualTransform == null)
+        {
+            if (!create)
+            {
+                return null;
+            }
+
+            GameObject visualObject = new GameObject(SealedGapVisualChildName);
+            visualTransform = visualObject.transform;
+            visualTransform.SetParent(doorTransform, false);
+        }
+
+        SpriteRenderer renderer = visualTransform.GetComponent<SpriteRenderer>();
+        if (renderer == null)
+        {
+            renderer = visualTransform.gameObject.AddComponent<SpriteRenderer>();
+        }
+
+        SpriteRenderer sourceRenderer = doorObjects[doorIndex].GetComponent<SpriteRenderer>();
+        if (sourceRenderer != null)
+        {
+            renderer.sortingLayerID = sourceRenderer.sortingLayerID;
+            renderer.sortingOrder = sourceRenderer.sortingOrder;
+        }
+        else
+        {
+            renderer.sortingOrder = 2;
+        }
+
+        renderer.sprite = GetSealedGapSprite();
+        renderer.color = new Color(0.055f, 0.078f, 0.12f, 1f);
+        return renderer;
+    }
+
+    private void ApplySealedGapVisualLayout(int doorIndex, SpriteRenderer renderer)
+    {
+        if (renderer == null || renderer.sprite == null || doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return;
+        }
+
+        Transform doorTransform = doorObjects[doorIndex].transform;
+        Transform visualTransform = renderer.transform;
+        visualTransform.localPosition = Vector3.zero;
+        visualTransform.localRotation = Quaternion.identity;
+
+        Vector2 targetSize = GetSealedGapVisualTargetSize(doorIndex);
+        Vector3 spriteSize = renderer.sprite.bounds.size;
+        float parentScaleX = Mathf.Abs(doorTransform.localScale.x) > 0.001f ? Mathf.Abs(doorTransform.localScale.x) : 1f;
+        float parentScaleY = Mathf.Abs(doorTransform.localScale.y) > 0.001f ? Mathf.Abs(doorTransform.localScale.y) : 1f;
+        float scaleX = spriteSize.x > 0.001f ? targetSize.x / spriteSize.x / parentScaleX : 1f;
+        float scaleY = spriteSize.y > 0.001f ? targetSize.y / spriteSize.y / parentScaleY : 1f;
+        visualTransform.localScale = new Vector3(scaleX, scaleY, 1f);
+    }
+
+    private static Sprite GetSealedGapSprite()
+    {
+        if (sealedGapSprite == null)
+        {
+            sealedGapSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
+        }
+
+        return sealedGapSprite;
+    }
+
     private void ApplyDoorVisualLayout(int doorIndex, SpriteRenderer renderer)
     {
         if (renderer == null || renderer.sprite == null || doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
@@ -840,6 +968,16 @@ public class DungeonRoom : MonoBehaviour
         }
 
         return new Vector2(2.65f, 2.25f);
+    }
+
+    private Vector2 GetSealedGapVisualTargetSize(int doorIndex)
+    {
+        if (doorIndex == 2 || doorIndex == 3)
+        {
+            return new Vector2(1.35f, 3.05f);
+        }
+
+        return new Vector2(3.15f, 1.35f);
     }
 
     private IEnumerator AnimateDoorRoutine(int doorIndex, Transform doorTransform, Vector3 targetPosition, BoxCollider2D solidCollider, bool opening)
