@@ -80,6 +80,11 @@ public class WeaponManager : MonoBehaviour
         }
 
         int resolvedAmmo = ResolveAmmoForEquip(weaponData, ammoOverride);
+        if (WeaponVisualResolver.IsPowerWeapon(weaponData))
+        {
+            return EquipPowerWeapon(weaponData, resolvedAmmo);
+        }
+
         int emptySlot = GetEmptySlot();
         if (emptySlot >= 0)
         {
@@ -96,6 +101,36 @@ public class WeaponManager : MonoBehaviour
         slotAmmo[activeSlot] = resolvedAmmo;
         ApplyActiveWeapon();
         DropWeapon(droppedWeapon, droppedAmmo);
+        return true;
+    }
+
+    private bool EquipPowerWeapon(WeaponData weaponData, int resolvedAmmo)
+    {
+        int powerSlot = GetEquippedPowerSlot();
+        if (powerSlot < 0)
+        {
+            powerSlot = GetEmptySlot();
+        }
+
+        if (powerSlot < 0)
+        {
+            powerSlot = equippedWeapons.Length > 1 ? 1 : activeSlot;
+        }
+
+        WeaponData replacedWeapon = equippedWeapons[powerSlot];
+        int replacedAmmo = slotAmmo[powerSlot];
+        bool replacedNonPowerWeapon = replacedWeapon != null && !WeaponVisualResolver.IsPowerWeapon(replacedWeapon);
+
+        equippedWeapons[powerSlot] = weaponData;
+        slotAmmo[powerSlot] = resolvedAmmo;
+        activeSlot = powerSlot;
+        ApplyActiveWeapon();
+
+        if (replacedNonPowerWeapon)
+        {
+            DropWeapon(replacedWeapon, replacedAmmo);
+        }
+
         return true;
     }
 
@@ -242,6 +277,19 @@ public class WeaponManager : MonoBehaviour
         for (int i = 0; i < equippedWeapons.Length; i++)
         {
             if (equippedWeapons[i] == null)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private int GetEquippedPowerSlot()
+    {
+        for (int i = 0; i < equippedWeapons.Length; i++)
+        {
+            if (WeaponVisualResolver.IsPowerWeapon(equippedWeapons[i]))
             {
                 return i;
             }

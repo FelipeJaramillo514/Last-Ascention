@@ -16,7 +16,6 @@ public class KaisenController : MonoBehaviour
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private WeaponManager weaponManager;
     [SerializeField] private KnifeAuraAttack knifeAuraAttack;
-    [SerializeField] private OrangeFireAbility orangeFireAbility;
 
     [Header("Stats")]
     [SerializeField] private KaisenStats stats = new KaisenStats();
@@ -126,16 +125,6 @@ public class KaisenController : MonoBehaviour
         if (knifeAuraAttack == null)
         {
             knifeAuraAttack = GetComponent<KnifeAuraAttack>();
-        }
-
-        if (orangeFireAbility == null)
-        {
-            orangeFireAbility = GetComponent<OrangeFireAbility>();
-        }
-
-        if (orangeFireAbility == null)
-        {
-            orangeFireAbility = gameObject.AddComponent<OrangeFireAbility>();
         }
 
         ConfigurePhysicsBody();
@@ -337,20 +326,9 @@ public class KaisenController : MonoBehaviour
         bool attackPressed = (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
             || (Gamepad.current != null && Gamepad.current.buttonWest.wasPressedThisFrame);
 
-        bool orangePowerPressed = (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
-            || (Gamepad.current != null && Gamepad.current.rightTrigger.wasPressedThisFrame);
-
         if (dodgePressed)
         {
             TryStartDodge();
-        }
-
-        if (orangePowerPressed && orangeFireAbility != null)
-        {
-            if (orangeFireAbility.TryFire(aimDirection))
-            {
-                return;
-            }
         }
 
         if (attackPressed)
@@ -599,7 +577,6 @@ public class KaisenController : MonoBehaviour
         playerHealth = GetComponent<PlayerHealth>();
         weaponManager = GetComponent<WeaponManager>();
         knifeAuraAttack = GetComponent<KnifeAuraAttack>();
-        orangeFireAbility = GetComponent<OrangeFireAbility>();
         enemyLayer = LayerMask.GetMask("Enemy");
         ConfigurePhysicsBody();
     }

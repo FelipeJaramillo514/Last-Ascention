@@ -747,7 +747,7 @@ public class DungeonRoom : MonoBehaviour
 
         Transform visualTransform = renderer.transform;
         Transform doorTransform = doorObjects[doorIndex].transform;
-        visualTransform.localPosition = GetDoorVisualOffset();
+        visualTransform.localPosition = GetDoorVisualOffset(doorIndex);
         visualTransform.localRotation = Quaternion.identity;
 
         Vector2 targetSize = GetDoorVisualTargetSize(doorIndex);
@@ -759,8 +759,18 @@ public class DungeonRoom : MonoBehaviour
         visualTransform.localScale = new Vector3(scaleX, scaleY, 1f);
     }
 
-    private Vector3 GetDoorVisualOffset()
+    private Vector3 GetDoorVisualOffset(int doorIndex)
     {
+        if (doorIndex == 2)
+        {
+            return new Vector3(0.28f, 0f, 0f);
+        }
+
+        if (doorIndex == 3)
+        {
+            return new Vector3(-0.28f, 0f, 0f);
+        }
+
         return Vector3.zero;
     }
 
@@ -768,7 +778,7 @@ public class DungeonRoom : MonoBehaviour
     {
         if (doorIndex == 2 || doorIndex == 3)
         {
-            return new Vector2(2.25f, 2.65f);
+            return new Vector2(1.85f, 2.45f);
         }
 
         return new Vector2(2.65f, 2.25f);

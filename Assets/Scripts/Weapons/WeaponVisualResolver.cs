@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public static class WeaponVisualResolver
@@ -6,12 +7,14 @@ public static class WeaponVisualResolver
     private const float ProjectilePixelsPerUnit = 512f;
     private const string BluePowerPath = "PowerSprites/PowerBlue";
     private const string OrangePowerPath = "PowerSprites/PowerOrange";
+    private const string BlueAuraProjectilePath = "KnifeAura/Projectile";
     private const string OrangeFireballPath = "OrangeFireball/FireballSheet";
     private const int FireballColumns = 3;
     private const int FireballRows = 3;
 
     private static Sprite bluePowerIcon;
     private static Sprite orangePowerIcon;
+    private static Sprite[] blueAuraProjectileFrames;
     private static Sprite[] orangeFireballFrames;
 
     public static Sprite GetWeaponIcon(WeaponData weaponData)
@@ -36,12 +39,22 @@ public static class WeaponVisualResolver
 
     public static Sprite[] GetProjectileFrames(WeaponData weaponData)
     {
+        if (weaponData != null && IsBluePower(weaponData))
+        {
+            return GetBlueAuraProjectileFrames();
+        }
+
         if (weaponData != null && IsOrangePower(weaponData))
         {
             return GetOrangeFireballFrames();
         }
 
         return weaponData != null ? weaponData.animationFrames : null;
+    }
+
+    public static bool IsPowerWeapon(WeaponData weaponData)
+    {
+        return IsBluePower(weaponData) || IsOrangePower(weaponData);
     }
 
     public static bool IsBluePower(WeaponData weaponData)
@@ -70,6 +83,16 @@ public static class WeaponVisualResolver
         }
 
         return ((weaponData.weaponName ?? string.Empty) + " " + weaponData.name).ToLowerInvariant();
+    }
+
+    private static Sprite[] GetBlueAuraProjectileFrames()
+    {
+        if (blueAuraProjectileFrames == null)
+        {
+            blueAuraProjectileFrames = LoadOrderedSprites(BlueAuraProjectilePath);
+        }
+
+        return blueAuraProjectileFrames;
     }
 
     private static Sprite[] GetOrangeFireballFrames()
@@ -106,6 +129,18 @@ public static class WeaponVisualResolver
         }
 
         return orangeFireballFrames;
+    }
+
+    private static Sprite[] LoadOrderedSprites(string resourcePath)
+    {
+        Sprite[] sprites = Resources.LoadAll<Sprite>(resourcePath);
+        if (sprites == null || sprites.Length == 0)
+        {
+            return new Sprite[0];
+        }
+
+        Array.Sort(sprites, (left, right) => string.Compare(left.name, right.name, StringComparison.Ordinal));
+        return sprites;
     }
 
     private static Sprite LoadFullTextureSprite(string resourcePath, ref Sprite cachedSprite, float pixelsPerUnit)
