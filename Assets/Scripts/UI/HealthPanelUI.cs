@@ -185,7 +185,12 @@ public class HealthPanelUI : MonoBehaviour
             return;
         }
 
-        titleText.text = "LAST ASCENSION";
+        if (titleText != null)
+        {
+            titleText.text = string.Empty;
+            titleText.gameObject.SetActive(false);
+        }
+
         levelText.text = "NV " + cachedController.Stats.systemLevel;
         rankText.text = "RANGO " + cachedController.Stats.officialRank;
 
@@ -215,13 +220,15 @@ public class HealthPanelUI : MonoBehaviour
     private void RefreshHearts()
     {
         int maxHearts = Mathf.Max(1, Mathf.CeilToInt(targetMaxHP / 10f));
-        int visibleHearts = Mathf.Min(10, maxHearts);
+        int visibleHearts = maxHearts > 10 ? 8 : Mathf.Min(10, maxHearts);
         EnsureHeartCapacity(visibleHearts);
 
         for (int i = 0; i < heartImages.Count; i++)
         {
             bool visible = i < visibleHearts;
             heartImages[i].gameObject.SetActive(visible);
+            heartImages[i].rectTransform.anchoredPosition = new Vector2(i * 15f, 0f);
+            heartImages[i].rectTransform.sizeDelta = new Vector2(14f, 14f);
             if (!visible)
             {
                 continue;
@@ -251,7 +258,7 @@ public class HealthPanelUI : MonoBehaviour
 
     private IEnumerator ShakeHeartRoutine(RectTransform target, int index)
     {
-        Vector2 basePosition = new Vector2(index * 19f, 0f);
+        Vector2 basePosition = new Vector2(index * 15f, 0f);
         float elapsed = 0f;
         while (elapsed < 0.22f)
         {
@@ -276,8 +283,8 @@ public class HealthPanelUI : MonoBehaviour
             rect.anchorMin = new Vector2(0f, 1f);
             rect.anchorMax = new Vector2(0f, 1f);
             rect.pivot = new Vector2(0f, 1f);
-            rect.sizeDelta = new Vector2(16f, 16f);
-            rect.anchoredPosition = new Vector2(heartImages.Count * 19f, 0f);
+            rect.sizeDelta = new Vector2(14f, 14f);
+            rect.anchoredPosition = new Vector2(heartImages.Count * 15f, 0f);
             heartImage.raycastTarget = false;
             heartImages.Add(heartImage);
             shakeRoutines.Add(null);
@@ -301,6 +308,7 @@ public class HealthPanelUI : MonoBehaviour
     {
         if (overlayCanvas != null && root != null && heartsRoot != null && portraitImage != null && healthFill != null && delayedHealthFill != null && healthGlow != null && expFill != null && hpText != null && levelText != null && rankText != null && penaltyRoot != null && penaltyFill != null && penaltyText != null)
         {
+            ApplyHeaderHeartsLayout();
             return;
         }
 
@@ -413,8 +421,8 @@ public class HealthPanelUI : MonoBehaviour
         expFill.color = new Color(0.72f, 0.24f, 1f, 0.95f);
         expText = EnsureText(root, "ExpText", 11, TextAnchor.MiddleLeft, new Color(0.82f, 0.74f, 1f, 1f), new Vector2(98f, -119f), new Vector2(164f, 14f));
 
-        heartsRoot = EnsureRect(root, "Hearts", new Vector2(18f, -108f), new Vector2(190f, 18f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
-        heartCountText = EnsureText(root, "HeartCount", 13, TextAnchor.MiddleLeft, Color.white, new Vector2(205f, -111f), new Vector2(48f, 16f));
+        heartsRoot = EnsureRect(root, "Hearts", new Vector2(98f, -20f), new Vector2(130f, 16f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+        heartCountText = EnsureText(root, "HeartCount", 13, TextAnchor.MiddleLeft, Color.white, new Vector2(222f, -20f), new Vector2(38f, 16f));
 
         penaltyRoot = EnsureRect(root, "Penalty", new Vector2(18f, 10f), new Vector2(306f, 20f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f));
         Image penaltyBackground = penaltyRoot.GetComponent<Image>();
@@ -434,6 +442,35 @@ public class HealthPanelUI : MonoBehaviour
 
         penaltyText = EnsureText(penaltyRoot, "Text", 12, TextAnchor.MiddleCenter, Color.white, Vector2.zero, penaltyRoot.sizeDelta);
         penaltyRoot.gameObject.SetActive(false);
+        ApplyHeaderHeartsLayout();
+    }
+
+    private void ApplyHeaderHeartsLayout()
+    {
+        if (titleText != null)
+        {
+            titleText.text = string.Empty;
+            titleText.gameObject.SetActive(false);
+        }
+
+        if (heartsRoot != null)
+        {
+            heartsRoot.anchorMin = new Vector2(0f, 1f);
+            heartsRoot.anchorMax = new Vector2(0f, 1f);
+            heartsRoot.pivot = new Vector2(0f, 1f);
+            heartsRoot.anchoredPosition = new Vector2(98f, -20f);
+            heartsRoot.sizeDelta = new Vector2(130f, 16f);
+        }
+
+        if (heartCountText != null)
+        {
+            RectTransform countRect = heartCountText.rectTransform;
+            countRect.anchorMin = new Vector2(0f, 1f);
+            countRect.anchorMax = new Vector2(0f, 1f);
+            countRect.pivot = new Vector2(0f, 1f);
+            countRect.anchoredPosition = new Vector2(222f, -20f);
+            countRect.sizeDelta = new Vector2(38f, 16f);
+        }
     }
 
     private Canvas FindOverlayCanvas()
