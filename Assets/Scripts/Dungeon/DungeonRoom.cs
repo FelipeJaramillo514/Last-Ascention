@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 [RequireComponent(typeof(BoxCollider2D))]
 public class DungeonRoom : MonoBehaviour
@@ -14,13 +15,11 @@ public class DungeonRoom : MonoBehaviour
     private const float DoorSpritePixelsPerUnit = 160f;
     private const float DoorSpriteAnimationDuration = 0.42f;
     private const string DoorVisualChildName = "DoorSpriteVisual";
-    private const string SealedGapVisualChildName = "SealedGapFill";
     private const string EntryOrangePowerResourcePath = "Weapons/PoderNaranja";
     private const string EntryOrangePowerPickupName = "StartingOrangePower";
 
     private static Sprite[][] doorAnimationFrames;
     private static Sprite[][] sideDoorAnimationFrames;
-    private static Sprite sealedGapSprite;
     private static bool doorAnimationLoadAttempted;
     private static bool sideDoorAnimationLoadAttempted;
 
@@ -125,21 +124,18 @@ public class DungeonRoom : MonoBehaviour
                 continue;
             }
 
+            if (!activeDoors[i])
+            {
+                SealInactiveDoor(i);
+                continue;
+            }
+
             doorObjects[i].SetActive(true);
             DoorTrigger trigger = doorObjects[i].GetComponentInChildren<DoorTrigger>(true);
             if (trigger != null)
             {
-                trigger.gameObject.SetActive(activeDoors[i]);
-                trigger.SetTraversalEnabled(activeDoors[i]);
-            }
-
-            if (!activeDoors[i])
-            {
-                SealInactiveDoor(i);
-            }
-            else
-            {
-                SetSealedGapVisualVisible(i, false);
+                trigger.gameObject.SetActive(true);
+                trigger.SetTraversalEnabled(true);
             }
         }
 
@@ -155,23 +151,122 @@ public class DungeonRoom : MonoBehaviour
 
         GameObject doorObject = doorObjects[doorIndex];
         doorObject.transform.localPosition = closedDoorLocalPositions[doorIndex];
+        FillInactiveDoorOpeningWithWallTiles(doorIndex);
 
         BoxCollider2D solidCollider = doorObject.GetComponent<BoxCollider2D>();
         if (solidCollider != null)
         {
-            solidCollider.enabled = true;
+            solidCollider.enabled = false;
             solidCollider.isTrigger = false;
         }
 
         DoorTrigger trigger = doorObject.GetComponentInChildren<DoorTrigger>(true);
         if (trigger != null)
         {
-            trigger.SetTraversalEnabled(false);
-            trigger.gameObject.SetActive(false);
+                trigger.SetTraversalEnabled(false);
+                trigger.gameObject.SetActive(false);
         }
 
-        SetDoorSpriteFrame(doorIndex, false);
-        SetSealedGapVisualVisible(doorIndex, true);
+        doorObject.SetActive(false);
+    }
+
+    private void FillInactiveDoorOpeningWithWallTiles(int doorIndex)
+    {
+        Tilemap wallTilemap = FindWallTilemap();
+        if (wallTilemap == null || doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
+        {
+            return;
+        }
+
+        Vector3 worldPosition = doorPoints != null && doorIndex < doorPoints.Length && doorPoints[doorIndex] != null
+            ? doorPoints[doorIndex].position
+            : doorObjects[doorIndex].transform.position;
+        Vector3Int centerCell = wallTilemap.WorldToCell(worldPosition);
+        TileBase wallTile = FindNearestWallTile(wallTilemap, centerCell);
+        if (wallTile == null)
+        {
+            return;
+        }
+
+        BoundsInt fillBounds = GetDoorOpeningFillBounds(doorIndex, centerCell);
+        foreach (Vector3Int position in fillBounds.allPositionsWithin)
+        {
+            wallTilemap.SetTile(position, wallTile);
+        }
+
+        wallTilemap.RefreshAllTiles();
+        TilemapCollider2D collider = wallTilemap.GetComponent<TilemapCollider2D>();
+        if (collider != null)
+        {
+            collider.ProcessTilemapChanges();
+        }
+    }
+
+    private Tilemap FindWallTilemap()
+    {
+        Tilemap[] tilemaps = GetComponentsInChildren<Tilemap>(true);
+        for (int i = 0; i < tilemaps.Length; i++)
+        {
+            if (tilemaps[i] != null && tilemaps[i].name == "Walls")
+            {
+                return tilemaps[i];
+            }
+        }
+
+        for (int i = 0; i < tilemaps.Length; i++)
+        {
+            if (tilemaps[i] != null && tilemaps[i].GetComponent<TilemapCollider2D>() != null)
+            {
+                return tilemaps[i];
+            }
+        }
+
+        return tilemaps.Length > 0 ? tilemaps[0] : null;
+    }
+
+    private TileBase FindNearestWallTile(Tilemap wallTilemap, Vector3Int centerCell)
+    {
+        for (int radius = 1; radius <= 8; radius++)
+        {
+            for (int y = -radius; y <= radius; y++)
+            {
+                for (int x = -radius; x <= radius; x++)
+                {
+                    if (Mathf.Abs(x) != radius && Mathf.Abs(y) != radius)
+                    {
+                        continue;
+                    }
+
+                    TileBase tile = wallTilemap.GetTile(centerCell + new Vector3Int(x, y, 0));
+                    if (tile != null)
+                    {
+                        return tile;
+                    }
+                }
+            }
+        }
+
+        BoundsInt bounds = wallTilemap.cellBounds;
+        foreach (Vector3Int position in bounds.allPositionsWithin)
+        {
+            TileBase tile = wallTilemap.GetTile(position);
+            if (tile != null)
+            {
+                return tile;
+            }
+        }
+
+        return null;
+    }
+
+    private BoundsInt GetDoorOpeningFillBounds(int doorIndex, Vector3Int centerCell)
+    {
+        if (doorIndex == 2 || doorIndex == 3)
+        {
+            return new BoundsInt(centerCell.x - 1, centerCell.y - 1, centerCell.z, 2, 3, 1);
+        }
+
+        return new BoundsInt(centerCell.x - 1, centerCell.y - 1, centerCell.z, 3, 2, 1);
     }
 
     public void ConfigureDoorLink(int doorIndex, DungeonRoom destinationRoom, int destinationDoorIndex)
@@ -835,95 +930,6 @@ public class DungeonRoom : MonoBehaviour
         return renderer;
     }
 
-    private void SetSealedGapVisualVisible(int doorIndex, bool visible)
-    {
-        SpriteRenderer renderer = GetSealedGapVisualRenderer(doorIndex, visible);
-        if (renderer == null)
-        {
-            return;
-        }
-
-        renderer.enabled = visible;
-        if (visible)
-        {
-            ApplySealedGapVisualLayout(doorIndex, renderer);
-        }
-    }
-
-    private SpriteRenderer GetSealedGapVisualRenderer(int doorIndex, bool create)
-    {
-        if (doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
-        {
-            return null;
-        }
-
-        Transform doorTransform = doorObjects[doorIndex].transform;
-        Transform visualTransform = doorTransform.Find(SealedGapVisualChildName);
-        if (visualTransform == null)
-        {
-            if (!create)
-            {
-                return null;
-            }
-
-            GameObject visualObject = new GameObject(SealedGapVisualChildName);
-            visualTransform = visualObject.transform;
-            visualTransform.SetParent(doorTransform, false);
-        }
-
-        SpriteRenderer renderer = visualTransform.GetComponent<SpriteRenderer>();
-        if (renderer == null)
-        {
-            renderer = visualTransform.gameObject.AddComponent<SpriteRenderer>();
-        }
-
-        SpriteRenderer sourceRenderer = doorObjects[doorIndex].GetComponent<SpriteRenderer>();
-        if (sourceRenderer != null)
-        {
-            renderer.sortingLayerID = sourceRenderer.sortingLayerID;
-            renderer.sortingOrder = sourceRenderer.sortingOrder;
-        }
-        else
-        {
-            renderer.sortingOrder = 2;
-        }
-
-        renderer.sprite = GetSealedGapSprite();
-        renderer.color = new Color(0.055f, 0.078f, 0.12f, 1f);
-        return renderer;
-    }
-
-    private void ApplySealedGapVisualLayout(int doorIndex, SpriteRenderer renderer)
-    {
-        if (renderer == null || renderer.sprite == null || doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
-        {
-            return;
-        }
-
-        Transform doorTransform = doorObjects[doorIndex].transform;
-        Transform visualTransform = renderer.transform;
-        visualTransform.localPosition = Vector3.zero;
-        visualTransform.localRotation = Quaternion.identity;
-
-        Vector2 targetSize = GetSealedGapVisualTargetSize(doorIndex);
-        Vector3 spriteSize = renderer.sprite.bounds.size;
-        float parentScaleX = Mathf.Abs(doorTransform.localScale.x) > 0.001f ? Mathf.Abs(doorTransform.localScale.x) : 1f;
-        float parentScaleY = Mathf.Abs(doorTransform.localScale.y) > 0.001f ? Mathf.Abs(doorTransform.localScale.y) : 1f;
-        float scaleX = spriteSize.x > 0.001f ? targetSize.x / spriteSize.x / parentScaleX : 1f;
-        float scaleY = spriteSize.y > 0.001f ? targetSize.y / spriteSize.y / parentScaleY : 1f;
-        visualTransform.localScale = new Vector3(scaleX, scaleY, 1f);
-    }
-
-    private static Sprite GetSealedGapSprite()
-    {
-        if (sealedGapSprite == null)
-        {
-            sealedGapSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-        }
-
-        return sealedGapSprite;
-    }
-
     private void ApplyDoorVisualLayout(int doorIndex, SpriteRenderer renderer)
     {
         if (renderer == null || renderer.sprite == null || doorObjects == null || doorIndex < 0 || doorIndex >= doorObjects.Length || doorObjects[doorIndex] == null)
@@ -968,16 +974,6 @@ public class DungeonRoom : MonoBehaviour
         }
 
         return new Vector2(2.65f, 2.25f);
-    }
-
-    private Vector2 GetSealedGapVisualTargetSize(int doorIndex)
-    {
-        if (doorIndex == 2 || doorIndex == 3)
-        {
-            return new Vector2(1.35f, 3.05f);
-        }
-
-        return new Vector2(3.15f, 1.35f);
     }
 
     private IEnumerator AnimateDoorRoutine(int doorIndex, Transform doorTransform, Vector3 targetPosition, BoxCollider2D solidCollider, bool opening)
