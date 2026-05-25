@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class MissionPanelUI : MonoBehaviour
 {
+    private const float PanelTopOffset = -260f;
+
     private sealed class MissionEntryWidgets
     {
         public Text nameText;
@@ -58,8 +60,8 @@ public class MissionPanelUI : MonoBehaviour
         float targetSlide = isExpanded ? 1f : 0f;
         currentSlide = Mathf.MoveTowards(currentSlide, targetSlide, Time.unscaledDeltaTime * 5f);
         panelCanvasGroup.alpha = Mathf.Lerp(0.35f, 1f, currentSlide);
-        panelRoot.anchoredPosition = new Vector2(Mathf.Lerp(-308f, 16f, currentSlide), -304f);
-        handleRoot.anchoredPosition = new Vector2(Mathf.Lerp(16f, 316f, currentSlide), -304f);
+        panelRoot.anchoredPosition = new Vector2(Mathf.Lerp(-308f, 16f, currentSlide), PanelTopOffset);
+        handleRoot.anchoredPosition = new Vector2(Mathf.Lerp(16f, 316f, currentSlide), PanelTopOffset);
     }
 
     private void AttachMissionSystemIfNeeded()
@@ -162,7 +164,7 @@ public class MissionPanelUI : MonoBehaviour
         overlayRect.offsetMin = Vector2.zero;
         overlayRect.offsetMax = Vector2.zero;
 
-        handleRoot = EnsureRect(overlay, "Handle", new Vector2(16f, -304f), new Vector2(118f, 28f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+        handleRoot = EnsureRect(overlay, "Handle", new Vector2(16f, PanelTopOffset), new Vector2(118f, 28f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
         Image handleImage = handleRoot.GetComponent<Image>();
         if (handleImage == null)
         {
@@ -180,7 +182,7 @@ public class MissionPanelUI : MonoBehaviour
         Text handleText = EnsureText(handleRoot, "Text", 13, TextAnchor.MiddleCenter, Color.white, Vector2.zero, handleRoot.sizeDelta);
         handleText.text = "[TAB] Misiones";
 
-        panelRoot = EnsureRect(overlay, "MissionPanel", new Vector2(-308f, -304f), new Vector2(292f, 236f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+        panelRoot = EnsureRect(overlay, "MissionPanel", new Vector2(-308f, PanelTopOffset), new Vector2(292f, 236f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
         Image panelImage = panelRoot.GetComponent<Image>();
         if (panelImage == null)
         {

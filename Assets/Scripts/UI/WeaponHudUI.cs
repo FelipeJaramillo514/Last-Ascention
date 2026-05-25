@@ -6,6 +6,9 @@ public class WeaponHudUI : MonoBehaviour
 {
     public static WeaponHudUI Instance { get; private set; }
 
+    private static readonly Vector2 ActivePanelPosition = new Vector2(16f, -116f);
+    private static readonly Vector2 SecondaryPanelPosition = new Vector2(16f, -206f);
+
     [SerializeField] private Canvas overlayCanvas;
     [SerializeField] private RectTransform activePanel;
     [SerializeField] private Image activeIcon;
@@ -255,8 +258,8 @@ public class WeaponHudUI : MonoBehaviour
         overlayRect.offsetMin = Vector2.zero;
         overlayRect.offsetMax = Vector2.zero;
 
-        activePanel = EnsurePanel(overlay, "ActivePanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(16f, -158f), new Vector2(342f, 82f), new Color(0.015f, 0.024f, 0.036f, 0.88f));
-        secondaryPanel = EnsurePanel(overlay, "SecondaryPanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(16f, -248f), new Vector2(304f, 44f), new Color(0.01f, 0.016f, 0.026f, 0.78f));
+        activePanel = EnsurePanel(overlay, "ActivePanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), ActivePanelPosition, new Vector2(342f, 82f), new Color(0.015f, 0.024f, 0.036f, 0.88f));
+        secondaryPanel = EnsurePanel(overlay, "SecondaryPanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), SecondaryPanelPosition, new Vector2(304f, 44f), new Color(0.01f, 0.016f, 0.026f, 0.78f));
 
         Image activeAccent = EnsureImage(activePanel, "PowerAccent", new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(4f, 0f));
         activeAccent.sprite = HUDSpriteFactory.WhiteSprite;
@@ -325,7 +328,7 @@ public class WeaponHudUI : MonoBehaviour
             activePanel.anchorMin = new Vector2(0f, 1f);
             activePanel.anchorMax = new Vector2(0f, 1f);
             activePanel.pivot = new Vector2(0f, 1f);
-            activePanel.anchoredPosition = new Vector2(16f, -158f);
+            activePanel.anchoredPosition = ActivePanelPosition;
             activePanel.sizeDelta = new Vector2(342f, 82f);
             ApplyPanelVisual(activePanel, new Color(0.012f, 0.018f, 0.028f, 0.92f));
         }
@@ -335,7 +338,7 @@ public class WeaponHudUI : MonoBehaviour
             secondaryPanel.anchorMin = new Vector2(0f, 1f);
             secondaryPanel.anchorMax = new Vector2(0f, 1f);
             secondaryPanel.pivot = new Vector2(0f, 1f);
-            secondaryPanel.anchoredPosition = new Vector2(16f, -248f);
+            secondaryPanel.anchoredPosition = SecondaryPanelPosition;
             secondaryPanel.sizeDelta = new Vector2(304f, 44f);
             ApplyPanelVisual(secondaryPanel, new Color(0.01f, 0.014f, 0.022f, 0.86f));
         }
