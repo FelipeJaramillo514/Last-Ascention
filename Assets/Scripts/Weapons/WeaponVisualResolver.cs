@@ -38,7 +38,7 @@ public static class WeaponVisualResolver
 
         if (IsStoneGauntlets(weaponData))
         {
-            return ResolveIconOrFallback(weaponData.weaponIcon, GetStoneGauntletsIcon);
+            return ResolveStoneGauntletsIcon(weaponData.weaponIcon);
         }
 
         if (IsWornBlade(weaponData))
@@ -207,6 +207,31 @@ public static class WeaponVisualResolver
         }
 
         return fallbackFactory != null ? fallbackFactory() : assetIcon;
+    }
+
+    private static Sprite ResolveStoneGauntletsIcon(Sprite assetIcon)
+    {
+        if (ShouldUseGeneratedIcon(assetIcon))
+        {
+            return GetStoneGauntletsIcon();
+        }
+
+        Texture2D texture = assetIcon.texture;
+        if (texture == null || texture.width < 512 || texture.height < 512)
+        {
+            return assetIcon;
+        }
+
+        if (stoneGauntletsIcon != null && stoneGauntletsIcon.texture == texture)
+        {
+            return stoneGauntletsIcon;
+        }
+
+        int frameWidth = texture.width / 4;
+        int frameHeight = texture.height / 4;
+        Rect frameRect = new Rect(0f, texture.height - frameHeight, frameWidth, frameHeight);
+        stoneGauntletsIcon = Sprite.Create(texture, frameRect, new Vector2(0.5f, 0.5f), frameWidth);
+        return stoneGauntletsIcon;
     }
 
     private static bool ShouldUseGeneratedIcon(Sprite assetIcon)
