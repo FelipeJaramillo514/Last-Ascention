@@ -1250,6 +1250,7 @@ MonoBehaviour:
   sourceDoorIndex: 0
   destinationDoorIndex: 0
   reentryCooldown: 0.25
+  traversalEnabled: 1
 --- !u!1 &3183273729055527366
 GameObject:
   m_ObjectHideFlags: 0
@@ -1578,6 +1579,7 @@ MonoBehaviour:
   sourceDoorIndex: 0
   destinationDoorIndex: 0
   reentryCooldown: 0.25
+  traversalEnabled: 1
 --- !u!1 &4315313099121542278
 GameObject:
   m_ObjectHideFlags: 0
@@ -1674,6 +1676,7 @@ MonoBehaviour:
   sourceDoorIndex: 0
   destinationDoorIndex: 0
   reentryCooldown: 0.25
+  traversalEnabled: 1
 --- !u!1 &4782297375394404778
 GameObject:
   m_ObjectHideFlags: 0
@@ -5184,6 +5187,7 @@ MonoBehaviour:
   sourceDoorIndex: 0
   destinationDoorIndex: 0
   reentryCooldown: 0.25
+  traversalEnabled: 1
 --- !u!1 &6660179419615060044
 GameObject:
   m_ObjectHideFlags: 0

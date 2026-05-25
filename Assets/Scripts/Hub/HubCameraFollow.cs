@@ -3,11 +3,11 @@ using UnityEngine;
 public class HubCameraFollow : MonoBehaviour
 {
     [SerializeField] private Transform target;
-    [SerializeField] private float smooth = 5f;
-    [SerializeField] private Vector2 framingOffset = new Vector2(0f, 0.25f);
-    [SerializeField] private float movementLookAhead = 0.35f;
+    [SerializeField] private float smooth = 12f;
+    [SerializeField] private Vector2 framingOffset = Vector2.zero;
+    [SerializeField] private float movementLookAhead = 0f;
     [SerializeField] private float maxLookAheadSpeed = 4.5f;
-    [SerializeField] private bool constrainToWorldBounds = true;
+    [SerializeField] private bool constrainToWorldBounds = false;
     [SerializeField] private Vector2 worldMin = new Vector2(-10f, -7.5f);
     [SerializeField] private Vector2 worldMax = new Vector2(10f, 6.5f);
 
@@ -30,7 +30,7 @@ public class HubCameraFollow : MonoBehaviour
     {
         worldMin = min;
         worldMax = max;
-        constrainToWorldBounds = true;
+        constrainToWorldBounds = false;
     }
 
     private void LateUpdate()
@@ -57,6 +57,12 @@ public class HubCameraFollow : MonoBehaviour
             targetPosition.y + framingOffset.y + lookAhead.y,
             transform.position.z);
         desired = ClampToWorldBounds(desired);
+        if (smooth <= 0f)
+        {
+            transform.position = desired;
+            return;
+        }
+
         transform.position = Vector3.Lerp(transform.position, desired, Time.deltaTime * smooth);
     }
 

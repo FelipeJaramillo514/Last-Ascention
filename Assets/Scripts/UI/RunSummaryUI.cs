@@ -12,7 +12,10 @@ public class RunSummaryUI : MonoBehaviour
     [SerializeField] private Text bodyText;
     [SerializeField] private Text goldText;
     [SerializeField] private Text footerText;
+    [SerializeField] private RectTransform creditsViewport;
+    [SerializeField] private Text creditsText;
     [SerializeField] private Button continueButton;
+    [SerializeField] private float creditsRollDuration = 18f;
 
     private Font uiFont;
     private Coroutine showRoutine;
@@ -41,9 +44,14 @@ public class RunSummaryUI : MonoBehaviour
         bodyText.text = string.Empty;
         goldText.text = string.Empty;
         footerText.text = string.Empty;
+        creditsText.text = string.Empty;
+        creditsViewport.gameObject.SetActive(false);
+        bodyText.gameObject.SetActive(true);
+        goldText.gameObject.SetActive(true);
 
         bool playerDied = stats != null && stats.playerDied;
-        titleText.color = stats != null && stats.completed ? new Color(0.3f, 1f, 0.45f, 1f) : new Color(1f, 0.25f, 0.25f, 1f);
+        bool runCompleted = stats != null && stats.completed;
+        titleText.color = runCompleted ? new Color(0.3f, 1f, 0.45f, 1f) : new Color(1f, 0.25f, 0.25f, 1f);
         continueButton.interactable = false;
         continueButton.gameObject.SetActive(false);
         continueButton.onClick.RemoveAllListeners();
@@ -63,7 +71,7 @@ public class RunSummaryUI : MonoBehaviour
         }
 
         panelCanvasGroup.alpha = 1f;
-        string titleValue = stats != null && stats.completed ? "RUN COMPLETADA" : "KAISEN HA CAIDO";
+        string titleValue = runCompleted ? "RUN COMPLETADA" : "KAISEN HA CAIDO";
         yield return Typewrite(titleText, titleValue, playerDied ? 0.05f : 0.015f);
 
         if (playerDied)
@@ -94,6 +102,12 @@ public class RunSummaryUI : MonoBehaviour
         bodyText.text = BuildStatsText(stats, 1f);
         goldText.text = "Cristales obtenidos: " + targetGold;
 
+        if (runCompleted)
+        {
+            yield return new WaitForSecondsRealtime(0.8f);
+            yield return PlayCreditsRoll();
+        }
+
         if (playerDied)
         {
             yield return new WaitForSecondsRealtime(5f);
@@ -119,6 +133,38 @@ public class RunSummaryUI : MonoBehaviour
         }
     }
 
+    private IEnumerator PlayCreditsRoll()
+    {
+        bodyText.gameObject.SetActive(false);
+        goldText.gameObject.SetActive(false);
+        footerText.color = new Color(0.55f, 0.88f, 1f, 1f);
+        footerText.text = "Gracias por completar la caceria.";
+        titleText.color = Color.white;
+        titleText.text = "CREDITOS";
+
+        creditsViewport.gameObject.SetActive(true);
+        creditsText.text = BuildCreditsText();
+        RectTransform creditsRect = creditsText.rectTransform;
+        creditsRect.sizeDelta = new Vector2(creditsRect.sizeDelta.x, 880f);
+
+        Canvas.ForceUpdateCanvases();
+        float viewportHeight = creditsViewport.rect.height;
+        float startY = -viewportHeight - 28f;
+        float endY = creditsRect.sizeDelta.y + 28f;
+        float elapsed = 0f;
+        while (elapsed < creditsRollDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / Mathf.Max(0.1f, creditsRollDuration));
+            creditsRect.anchoredPosition = new Vector2(0f, Mathf.Lerp(startY, endY, t));
+            yield return null;
+        }
+
+        creditsRect.anchoredPosition = new Vector2(0f, endY);
+        footerText.text = "FIN";
+        yield return new WaitForSecondsRealtime(0.9f);
+    }
+
     private string BuildStatsText(RunStats stats, float t)
     {
         int enemies = stats != null ? Mathf.RoundToInt(stats.enemiesKilled * t) : 0;
@@ -135,6 +181,48 @@ public class RunSummaryUI : MonoBehaviour
             FormatTime(timeValue));
     }
 
+    private string BuildCreditsText()
+    {
+        return
+            "LAST ASCENTION\n\n" +
+            "DIRECCION DEL PROYECTO\n" +
+            "Bayron Felipe Jaramillo\n\n" +
+            "PROGRAMACION\n" +
+            "Luis Esteban Castillo\n" +
+            "Matheu Ruales Galvis\n\n" +
+            "DISENO DE UI\n" +
+            "Bayron Felipe Jaramillo\n" +
+            "Matheu Ruales Galvis\n\n" +
+            "DISENO DE PERSONAJES\n" +
+            "Luis Esteban Castillo\n" +
+            "Bayron Felipe Jaramillo\n\n" +
+            "DISENO DE ENEMIGOS\n" +
+            "Matheu Ruales Galvis\n" +
+            "Luis Esteban Castillo\n\n" +
+            "DISENO DE MAZMORRAS\n" +
+            "Bayron Felipe Jaramillo\n" +
+            "Luis Esteban Castillo\n\n" +
+            "ARTE PIXEL Y ANIMACION\n" +
+            "Matheu Ruales Galvis\n" +
+            "Bayron Felipe Jaramillo\n\n" +
+            "SISTEMA DE SOMBRAS\n" +
+            "Luis Esteban Castillo\n" +
+            "Matheu Ruales Galvis\n\n" +
+            "BALANCE Y GAMEPLAY\n" +
+            "Bayron Felipe Jaramillo\n" +
+            "Luis Esteban Castillo\n" +
+            "Matheu Ruales Galvis\n\n" +
+            "AUDIO Y AMBIENTACION\n" +
+            "Matheu Ruales Galvis\n\n" +
+            "PRUEBAS Y CONTROL DE CALIDAD\n" +
+            "Bayron Felipe Jaramillo\n" +
+            "Luis Esteban Castillo\n" +
+            "Matheu Ruales Galvis\n\n" +
+            "AGRADECIMIENTOS ESPECIALES\n" +
+            "A todos los cazadores que llegaron hasta el final.\n\n\n" +
+            "GRACIAS POR JUGAR";
+    }
+
     private string FormatTime(float timeElapsed)
     {
         TimeSpan timeSpan = TimeSpan.FromSeconds(Mathf.Max(0f, timeElapsed));
@@ -143,7 +231,7 @@ public class RunSummaryUI : MonoBehaviour
 
     private void EnsureUi()
     {
-        if (overlayCanvas != null && panelRoot != null && panelCanvasGroup != null && titleText != null && bodyText != null && goldText != null && footerText != null && continueButton != null)
+        if (overlayCanvas != null && panelRoot != null && panelCanvasGroup != null && titleText != null && bodyText != null && goldText != null && footerText != null && creditsViewport != null && creditsText != null && continueButton != null)
         {
             return;
         }
@@ -197,6 +285,20 @@ public class RunSummaryUI : MonoBehaviour
         bodyText = EnsureText(panelRoot, "Body", 18, TextAnchor.UpperLeft, Color.white, new Vector2(-220f, 88f), new Vector2(440f, 170f), new Vector2(0f, 1f));
         goldText = EnsureText(panelRoot, "Gold", 22, TextAnchor.MiddleCenter, new Color(1f, 0.84f, 0f, 1f), new Vector2(0f, -40f), new Vector2(320f, 26f), new Vector2(0.5f, 0.5f));
         footerText = EnsureText(panelRoot, "Footer", 18, TextAnchor.MiddleCenter, Color.white, new Vector2(0f, -112f), new Vector2(520f, 48f), new Vector2(0.5f, 0.5f));
+
+        creditsViewport = EnsureRect(panelRoot, "CreditsViewport", new Vector2(0f, -6f), new Vector2(540f, 260f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+        if (creditsViewport.GetComponent<RectMask2D>() == null)
+        {
+            creditsViewport.gameObject.AddComponent<RectMask2D>();
+        }
+
+        creditsText = EnsureText(creditsViewport, "CreditsText", 18, TextAnchor.UpperCenter, Color.white, new Vector2(0f, 0f), new Vector2(500f, 880f), new Vector2(0.5f, 1f));
+        RectTransform creditsRect = creditsText.rectTransform;
+        creditsRect.anchorMin = new Vector2(0.5f, 1f);
+        creditsRect.anchorMax = new Vector2(0.5f, 1f);
+        creditsRect.pivot = new Vector2(0.5f, 1f);
+        creditsText.lineSpacing = 1.05f;
+        creditsViewport.gameObject.SetActive(false);
 
         RectTransform buttonRect = EnsureRect(panelRoot, "ContinueButton", new Vector2(0f, -170f), new Vector2(180f, 40f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
         Image buttonImage = buttonRect.GetComponent<Image>();

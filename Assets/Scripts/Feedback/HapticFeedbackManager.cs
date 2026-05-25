@@ -61,7 +61,9 @@ public class HapticFeedbackManager : MonoBehaviour
     {
         if (vibrate && Application.isMobilePlatform)
         {
+#if UNITY_ANDROID || UNITY_IOS
             Handheld.Vibrate();
+#endif
         }
 
         if (Gamepad.current == null)

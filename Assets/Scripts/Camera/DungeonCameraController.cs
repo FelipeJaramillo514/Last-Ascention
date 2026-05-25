@@ -16,11 +16,11 @@ public class DungeonCameraController : MonoBehaviour
     [SerializeField] private CinemachineConfiner2D gameplayConfiner;
     [SerializeField] private CinemachineConfiner2D bossConfiner;
     [SerializeField] private Vector3 fallbackOffset = new Vector3(0f, 0f, -10f);
-    [SerializeField] private float fallbackSmoothTime = 0.16f;
-    [SerializeField] private float fallbackSnapDistance = 8f;
-    [SerializeField] private float aimLookAhead = 0.45f;
-    [SerializeField] private float verticalFramingOffset = 0.12f;
-    [SerializeField] private float cameraTargetSmoothTime = 0.18f;
+    [SerializeField] private float fallbackSmoothTime = 0.08f;
+    [SerializeField] private float fallbackSnapDistance = 4f;
+    [SerializeField] private float aimLookAhead = 0f;
+    [SerializeField] private float verticalFramingOffset = 0f;
+    [SerializeField] private float cameraTargetSmoothTime = 0f;
 
     private readonly Dictionary<int, PolygonCollider2D> confinersByRoom = new Dictionary<int, PolygonCollider2D>();
     private DungeonRoom observedRoom;
@@ -137,6 +137,7 @@ public class DungeonCameraController : MonoBehaviour
             gameplayConfiner.BoundingShape2D = confinerShape;
             gameplayConfiner.InvalidateBoundingShapeCache();
             gameplayConfiner.InvalidateLensCache();
+            gameplayConfiner.enabled = false;
         }
 
         if (bossConfiner != null)
@@ -144,6 +145,7 @@ public class DungeonCameraController : MonoBehaviour
             bossConfiner.BoundingShape2D = confinerShape;
             bossConfiner.InvalidateBoundingShapeCache();
             bossConfiner.InvalidateLensCache();
+            bossConfiner.enabled = false;
         }
 
         observedBoss = room.GetComponentInChildren<BossBase>();
@@ -216,12 +218,14 @@ public class DungeonCameraController : MonoBehaviour
             framing = virtualCamera.AddCinemachineComponent<CinemachineFramingTransposer>();
         }
         framing.m_CameraDistance = 10f;
-        framing.m_DeadZoneWidth = 0.05f;
-        framing.m_DeadZoneHeight = 0.05f;
-        framing.m_SoftZoneWidth = 0.92f;
-        framing.m_SoftZoneHeight = 0.92f;
-        framing.m_XDamping = 0.45f;
-        framing.m_YDamping = 0.45f;
+        framing.m_ScreenX = 0.5f;
+        framing.m_ScreenY = 0.5f;
+        framing.m_DeadZoneWidth = 0f;
+        framing.m_DeadZoneHeight = 0f;
+        framing.m_SoftZoneWidth = 1f;
+        framing.m_SoftZoneHeight = 1f;
+        framing.m_XDamping = 0f;
+        framing.m_YDamping = 0f;
         framing.m_ZDamping = 0f;
         framing.m_LookaheadTime = 0f;
 
@@ -230,7 +234,8 @@ public class DungeonCameraController : MonoBehaviour
         {
             confiner = target.gameObject.AddComponent<CinemachineConfiner2D>();
         }
-        confiner.Damping = 0.25f;
+        confiner.Damping = 0f;
+        confiner.enabled = false;
 
         CinemachineImpulseListener impulseListener = target.GetComponent<CinemachineImpulseListener>();
         if (impulseListener == null)
@@ -326,22 +331,28 @@ public class DungeonCameraController : MonoBehaviour
         }
 
         Transform followTarget = cameraFollowTarget != null ? cameraFollowTarget : player.transform;
-        bool hasCinemachineFollow = brain != null
-            && brain.enabled
-            && gameplayCamera != null
+        bool gameplayCameraFollowsTarget = gameplayCamera != null
             && gameplayCamera.enabled
             && gameplayCamera.gameObject.activeInHierarchy
             && gameplayCamera.Follow == followTarget;
+        bool bossCameraFollowsTarget = bossCamera != null
+            && bossCamera.enabled
+            && bossCamera.gameObject.activeInHierarchy
+            && bossCamera.Follow == followTarget;
+        bool hasCinemachineFollow = brain != null
+            && brain.enabled
+            && (gameplayCameraFollowsTarget || bossCameraFollowsTarget);
 
-        if (hasCinemachineFollow)
+        Vector3 targetPosition = followTarget.position + fallbackOffset;
+        targetPosition.z = fallbackOffset.z;
+        float distanceToTarget = Vector2.Distance(mainCamera.transform.position, targetPosition);
+
+        if (hasCinemachineFollow && distanceToTarget <= fallbackSnapDistance)
         {
             return;
         }
 
-        Vector3 targetPosition = followTarget.position + fallbackOffset;
-        targetPosition.z = fallbackOffset.z;
-
-        if (Vector2.Distance(mainCamera.transform.position, targetPosition) > fallbackSnapDistance)
+        if (distanceToTarget > fallbackSnapDistance)
         {
             mainCamera.transform.position = targetPosition;
             return;
@@ -407,6 +418,13 @@ public class DungeonCameraController : MonoBehaviour
 
         Transform followTarget = EnsureCameraFollowTarget();
         Vector3 desiredPosition = GetDesiredCameraTargetPosition();
+        if (cameraTargetSmoothTime <= 0f)
+        {
+            followTarget.position = desiredPosition;
+            cameraTargetVelocity = Vector3.zero;
+            return;
+        }
+
         float smoothTime = Mathf.Max(0.001f, cameraTargetSmoothTime);
         followTarget.position = Vector3.SmoothDamp(
             followTarget.position,
@@ -424,38 +442,9 @@ public class DungeonCameraController : MonoBehaviour
             return Vector3.zero;
         }
 
-        Vector2 aim = player.AimDirection.sqrMagnitude > 0.001f ? player.AimDirection.normalized : Vector2.down;
+        Vector2 aim = player.AimDirection.sqrMagnitude > 0.001f ? player.AimDirection.normalized : Vector2.zero;
         Vector3 targetPosition = player.transform.position + (Vector3)(aim * aimLookAhead) + (Vector3.up * verticalFramingOffset);
-        targetPosition = ClampTargetToCurrentRoom(targetPosition);
         targetPosition.z = 0f;
-        return targetPosition;
-    }
-
-    private Vector3 ClampTargetToCurrentRoom(Vector3 targetPosition)
-    {
-        if (observedRoom == null)
-        {
-            return targetPosition;
-        }
-
-        BoxCollider2D roomBounds = observedRoom.GetComponent<BoxCollider2D>();
-        if (roomBounds == null)
-        {
-            return targetPosition;
-        }
-
-        Bounds bounds = roomBounds.bounds;
-        float padding = 1.25f;
-        if (bounds.size.x > padding * 2f)
-        {
-            targetPosition.x = Mathf.Clamp(targetPosition.x, bounds.min.x + padding, bounds.max.x - padding);
-        }
-
-        if (bounds.size.y > padding * 2f)
-        {
-            targetPosition.y = Mathf.Clamp(targetPosition.y, bounds.min.y + padding, bounds.max.y - padding);
-        }
-
         return targetPosition;
     }
 }

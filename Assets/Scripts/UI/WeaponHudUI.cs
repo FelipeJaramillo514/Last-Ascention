@@ -6,8 +6,8 @@ public class WeaponHudUI : MonoBehaviour
 {
     public static WeaponHudUI Instance { get; private set; }
 
-    private static readonly Vector2 ActivePanelPosition = new Vector2(16f, -116f);
-    private static readonly Vector2 SecondaryPanelPosition = new Vector2(16f, -206f);
+    private static readonly Vector2 ActivePanelPosition = new Vector2(16f, -164f);
+    private static readonly Vector2 SecondaryPanelPosition = new Vector2(16f, -256f);
 
     [SerializeField] private Canvas overlayCanvas;
     [SerializeField] private RectTransform activePanel;
@@ -553,7 +553,9 @@ public class WeaponHudUI : MonoBehaviour
         GameObject canvasObject = new GameObject("HUDCanvas", typeof(RectTransform));
         Canvas newCanvas = canvasObject.AddComponent<Canvas>();
         newCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1280f, 720f);
         canvasObject.AddComponent<GraphicRaycaster>();
         return newCanvas;
     }
