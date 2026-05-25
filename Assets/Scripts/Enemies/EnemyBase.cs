@@ -16,6 +16,8 @@ public enum EnemyState
 [RequireComponent(typeof(SpriteRenderer))]
 public abstract class EnemyBase : MonoBehaviour
 {
+    private const float NecromancyRaiseWindow = 18f;
+
     [Header("Enemy Data")]
     [SerializeField] protected EnemyData data;
 
@@ -59,7 +61,7 @@ public abstract class EnemyBase : MonoBehaviour
     public float MaxHP => data != null ? data.maxHP : 0f;
     public float DeathTimestamp => deathTimestamp;
     public bool IsDead => currentState == EnemyState.Dead;
-    public bool IsAvailableForShadowExtraction => IsDead && !shadowExtracted && data != null && data.isExtractable && Time.time - deathTimestamp <= 10f;
+    public bool IsAvailableForShadowExtraction => IsDead && !shadowExtracted && data != null && data.isExtractable && Time.time - deathTimestamp <= NecromancyRaiseWindow;
     public Sprite CurrentSprite => spriteRenderer != null ? spriteRenderer.sprite : null;
     protected Rigidbody2D Body => rb;
     protected Transform TargetTransform => playerTarget;
@@ -247,7 +249,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual float GetDeathDespawnDelay()
     {
-        return data != null && data.isExtractable ? 10f : 2f;
+        return data != null && data.isExtractable ? NecromancyRaiseWindow : 2f;
     }
 
     protected virtual void OnEnteredDeadState()

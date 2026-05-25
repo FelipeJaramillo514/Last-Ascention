@@ -20,7 +20,7 @@ MonoBehaviour:
   attackRange: 5.5
   attackCooldown: 1.25
   expValue: 14
-  isExtractable: 0
+  isExtractable: 1
   enemyType: 1
   attackType: 1
   dropTable:

@@ -8,8 +8,8 @@ using UnityEngine.SceneManagement;
 public enum MusicTrackId
 {
     None,
-    Hub,
-    DungeonFloor1,
+    Menu,
+    General,
     Boss
 }
 
@@ -45,6 +45,12 @@ public class AudioManager : MonoBehaviour
     private const string MasterVolumeKey = "audio_master";
     private const string MusicVolumeKey = "audio_music";
     private const string SfxVolumeKey = "audio_sfx";
+    private const string MainMenuSceneName = "MainMenu";
+    private const string HubSceneName = "CityArken";
+    private const string GameplaySceneName = "GameplayScene";
+    private const string MenuMusicResourcePath = "Music/MenuMusic";
+    private const string GeneralMusicResourcePath = "Music/GeneralMusic";
+    private const string BossMusicResourcePath = "Music/FinalBossMusic";
 
     public static AudioManager Instance { get; private set; }
 
@@ -215,7 +221,12 @@ public class AudioManager : MonoBehaviour
 
         if (!musicClips.TryGetValue(trackId, out AudioClip clip) || clip == null)
         {
-            clip = ProceduralAudioLibrary.CreateMusic(trackId);
+            clip = LoadMusicClip(trackId);
+            if (clip == null)
+            {
+                clip = ProceduralAudioLibrary.CreateMusic(trackId);
+            }
+
             musicClips[trackId] = clip;
         }
 
@@ -248,13 +259,13 @@ public class AudioManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "CityArken" || scene.name == "MainMenu")
+        if (scene.name == MainMenuSceneName)
         {
-            PlayMusic(MusicTrackId.Hub, 1f);
+            PlayMusic(MusicTrackId.Menu, 0.9f);
         }
-        else if (scene.name == "GameplayScene")
+        else if (scene.name == HubSceneName || scene.name == GameplaySceneName)
         {
-            PlayMusic(MusicTrackId.DungeonFloor1, 1f);
+            PlayMusic(MusicTrackId.General, 1.1f);
         }
     }
 
@@ -267,11 +278,11 @@ public class AudioManager : MonoBehaviour
 
         if (roomVisitedEvent.room.RuntimeRoomType == RoomType.Boss)
         {
-            PlayMusic(MusicTrackId.Boss, 1f);
+            PlayMusic(MusicTrackId.Boss, 1.45f);
         }
-        else if (SceneManager.GetActiveScene().name == "GameplayScene" && currentTrack != MusicTrackId.DungeonFloor1)
+        else if (SceneManager.GetActiveScene().name == GameplaySceneName && currentTrack != MusicTrackId.General)
         {
-            PlayMusic(MusicTrackId.DungeonFloor1, 1f);
+            PlayMusic(MusicTrackId.General, 1f);
         }
     }
 
@@ -409,8 +420,8 @@ public class AudioManager : MonoBehaviour
 
     private void WarmCaches()
     {
-        GetMusicClip(MusicTrackId.Hub);
-        GetMusicClip(MusicTrackId.DungeonFloor1);
+        GetMusicClip(MusicTrackId.Menu);
+        GetMusicClip(MusicTrackId.General);
         GetMusicClip(MusicTrackId.Boss);
         GetCueClip(AudioCueId.FootstepA);
         GetCueClip(AudioCueId.FootstepB);
@@ -498,6 +509,21 @@ public class AudioManager : MonoBehaviour
 
         return Mathf.Log10(value) * 20f;
     }
+
+    private static AudioClip LoadMusicClip(MusicTrackId trackId)
+    {
+        switch (trackId)
+        {
+            case MusicTrackId.Menu:
+                return Resources.Load<AudioClip>(MenuMusicResourcePath);
+            case MusicTrackId.General:
+                return Resources.Load<AudioClip>(GeneralMusicResourcePath);
+            case MusicTrackId.Boss:
+                return Resources.Load<AudioClip>(BossMusicResourcePath);
+            default:
+                return null;
+        }
+    }
 }
 
 internal static class ProceduralAudioLibrary
@@ -563,9 +589,9 @@ internal static class ProceduralAudioLibrary
     {
         switch (trackId)
         {
-            case MusicTrackId.Hub:
+            case MusicTrackId.Menu:
                 return CreateHubMusic();
-            case MusicTrackId.DungeonFloor1:
+            case MusicTrackId.General:
                 return CreateDungeonMusic();
             case MusicTrackId.Boss:
                 return CreateBossMusic();

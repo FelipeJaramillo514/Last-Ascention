@@ -6,10 +6,14 @@ using UnityEngine.UI;
 
 public class ShadowExtractionSystem : MonoBehaviour
 {
-    [SerializeField] private int maxShadows = 1;
-    [SerializeField] private float extractRange = 2f;
-    [SerializeField] private float holdDuration = 1.5f;
+    [Header("Necromancy")]
+    [SerializeField] private bool requireNecromancyUnlock;
+    [SerializeField] private int maxShadows = 3;
+    [SerializeField] private float extractRange = 2.75f;
+    [SerializeField] private float holdDuration = 1.15f;
     [SerializeField] private GameObject shadowSoldierPrefab;
+
+    [Header("UI")]
     [SerializeField] private Canvas overlayCanvas;
     [SerializeField] private RectTransform progressRoot;
     [SerializeField] private Image progressFill;
@@ -40,6 +44,9 @@ public class ShadowExtractionSystem : MonoBehaviour
     {
         owner = GetComponent<KaisenController>();
         mainCamera = Camera.main;
+        maxShadows = Mathf.Max(3, maxShadows);
+        extractRange = Mathf.Max(2.5f, extractRange);
+        holdDuration = Mathf.Clamp(holdDuration, 0.75f, 1.2f);
         EnsureUi();
     }
 
@@ -58,7 +65,7 @@ public class ShadowExtractionSystem : MonoBehaviour
     private void Update()
     {
         CleanupLists();
-        if (!PersistentData.shadowExtractionUnlocked)
+        if (requireNecromancyUnlock && !PersistentData.shadowExtractionUnlocked)
         {
             HideUi();
             return;
@@ -66,11 +73,18 @@ public class ShadowExtractionSystem : MonoBehaviour
 
         if (activeShadows.Count >= MaxShadows)
         {
+            currentCandidate = FindNearestCandidate(false);
+            if (currentCandidate != null && extractRoutine == null)
+            {
+                UpdateProgressUi(currentCandidate.transform.position, 1f, "LIMITE DE ALMAS " + activeShadows.Count + "/" + MaxShadows);
+                return;
+            }
+
             HideUi();
             return;
         }
 
-        currentCandidate = FindNearestCandidate();
+        currentCandidate = FindNearestCandidate(true);
         if (currentCandidate == null)
         {
             HideUi();
@@ -85,7 +99,7 @@ public class ShadowExtractionSystem : MonoBehaviour
         if (extractRoutine == null)
         {
             holdProgress = 0f;
-            UpdateProgressUi(currentCandidate.transform.position, 0f, "MANTEN [E] EXTRAER");
+            UpdateProgressUi(currentCandidate.transform.position, 0f, "MANTEN [E] LEVANTAR");
         }
     }
 
@@ -97,7 +111,7 @@ public class ShadowExtractionSystem : MonoBehaviour
         }
 
         EnemyBase enemy = enemyDiedEvent.enemy.GetComponent<EnemyBase>();
-        if (enemy == null || enemy.Data == null || !enemy.Data.isExtractable)
+        if (!CanRaiseEnemy(enemy))
         {
             return;
         }
@@ -142,7 +156,7 @@ public class ShadowExtractionSystem : MonoBehaviour
             }
 
             holdProgress += Time.deltaTime;
-            UpdateProgressUi(deadEnemy.transform.position, holdProgress / holdDuration, "EXTRAYENDO SOMBRA");
+            UpdateProgressUi(deadEnemy.transform.position, holdProgress / holdDuration, "LEVANTANDO ALMA");
             yield return null;
         }
 
@@ -152,6 +166,11 @@ public class ShadowExtractionSystem : MonoBehaviour
         {
             activeShadows.Add(soldier);
             EventBus.Publish(new ShadowSummonedEvent(soldier));
+            if (NotificationSystem.Instance != null)
+            {
+                string sourceName = deadEnemy.Data != null ? deadEnemy.Data.enemyName : "Enemigo";
+                NotificationSystem.Instance.ShowNotification("ALMA LEVANTADA: " + sourceName, new Color(0.25f, 1f, 0.9f, 1f), 1.4f);
+            }
         }
 
         SpawnExtractionParticles(spawnPosition);
@@ -176,14 +195,14 @@ public class ShadowExtractionSystem : MonoBehaviour
         return soldier;
     }
 
-    private EnemyBase FindNearestCandidate()
+    private EnemyBase FindNearestCandidate(bool requireFreeSlot)
     {
         EnemyBase nearest = null;
         float nearestDistance = float.MaxValue;
         for (int i = deadEnemies.Count - 1; i >= 0; i--)
         {
             EnemyBase enemy = deadEnemies[i];
-            if (!CanExtract(enemy))
+            if (!CanExtract(enemy, requireFreeSlot))
             {
                 continue;
             }
@@ -201,10 +220,23 @@ public class ShadowExtractionSystem : MonoBehaviour
 
     private bool CanExtract(EnemyBase enemy)
     {
+        return CanExtract(enemy, true);
+    }
+
+    private bool CanExtract(EnemyBase enemy, bool requireFreeSlot)
+    {
         return enemy != null
             && enemy.IsAvailableForShadowExtraction
             && Vector2.Distance(transform.position, enemy.transform.position) <= extractRange
-            && activeShadows.Count < MaxShadows;
+            && (!requireFreeSlot || activeShadows.Count < MaxShadows);
+    }
+
+    private bool CanRaiseEnemy(EnemyBase enemy)
+    {
+        return enemy != null
+            && enemy.Data != null
+            && enemy.Data.isExtractable
+            && enemy.GetComponent<BossBase>() == null;
     }
 
     private void CleanupLists()
@@ -237,7 +269,7 @@ public class ShadowExtractionSystem : MonoBehaviour
         main.startLifetime = 0.5f;
         main.startSpeed = 2f;
         main.startSize = 0.14f;
-        main.startColor = new Color(0f, 0f, 0f, 0.95f);
+        main.startColor = new Color(0.05f, 0.95f, 0.9f, 0.95f);
         main.simulationSpace = ParticleSystemSimulationSpace.World;
         var emission = particleSystem.emission;
         emission.rateOverTime = 0f;
@@ -369,6 +401,6 @@ public class ShadowExtractionSystem : MonoBehaviour
         promptText.font = uiFont;
         promptText.fontSize = 18;
         promptText.alignment = TextAnchor.MiddleCenter;
-        promptText.color = new Color(0.7f, 1f, 1f, 1f);
+        promptText.color = new Color(0.7f, 1f, 0.92f, 1f);
     }
 }

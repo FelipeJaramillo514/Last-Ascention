@@ -4,6 +4,8 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D), typeof(SpriteRenderer))]
 public class ShadowSoldier : MonoBehaviour
 {
+    private static readonly Color NecromancyTint = new Color(0.22f, 0.95f, 0.88f, 0.92f);
+
     private enum ShadowState
     {
         Orbit,
@@ -14,7 +16,7 @@ public class ShadowSoldier : MonoBehaviour
     [SerializeField] private float maxHP = 150f;
     [SerializeField] private float orbitRadius = 2f;
     [SerializeField] private float orbitAngularSpeed = 90f;
-    [SerializeField] private float chaseRange = 8f;
+    [SerializeField] private float chaseRange = 9.5f;
     [SerializeField] private float meleeRange = 1.25f;
     [SerializeField] private float rangedRange = 5f;
     [SerializeField] private float attackCooldown = 0.9f;
@@ -62,6 +64,7 @@ public class ShadowSoldier : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         gameObject.layer = LayerMask.NameToLayer("Shadow_Soldier");
+        chaseRange = Mathf.Max(9.5f, chaseRange);
         currentHP = maxHP;
         EnsureEyeLight();
     }
@@ -126,12 +129,15 @@ public class ShadowSoldier : MonoBehaviour
 
         if (sourceData != null)
         {
-            damage = Mathf.Max(8f, sourceData.damage);
-            moveSpeed = Mathf.Max(2f, sourceData.moveSpeed);
+            maxHP = Mathf.Max(maxHP, sourceData.maxHP * 1.15f);
+            currentHP = maxHP;
+            damage = Mathf.Max(8f, sourceData.damage * 0.85f);
+            moveSpeed = Mathf.Max(2.4f, sourceData.moveSpeed * 0.95f);
             attackType = sourceData.attackType;
-            name = "Shadow_" + sourceData.enemyName.Replace(" ", string.Empty);
+            name = "Necromancy_" + sourceData.enemyName.Replace(" ", string.Empty);
         }
 
+        Color sourceColor = Color.white;
         if (sourceEnemy != null)
         {
             transform.position = sourceEnemy.transform.position;
@@ -140,6 +146,12 @@ public class ShadowSoldier : MonoBehaviour
             if (spriteRenderer != null && sprite != null)
             {
                 spriteRenderer.sprite = sprite;
+            }
+
+            SpriteRenderer sourceRenderer = sourceEnemy.GetComponent<SpriteRenderer>();
+            if (sourceRenderer != null)
+            {
+                sourceColor = sourceRenderer.color;
             }
 
             CapsuleCollider2D sourceCollider = sourceEnemy.GetComponent<CapsuleCollider2D>();
@@ -152,9 +164,9 @@ public class ShadowSoldier : MonoBehaviour
 
         if (spriteRenderer != null)
         {
-            spriteRenderer.color = Color.black;
+            spriteRenderer.color = Color.Lerp(sourceColor, NecromancyTint, 0.72f);
             spriteRenderer.sortingLayerName = "Characters";
-            spriteRenderer.sortingOrder = 2;
+            spriteRenderer.sortingOrder = 3;
         }
 
         EnsureEyeLight();
@@ -236,6 +248,11 @@ public class ShadowSoldier : MonoBehaviour
 
         float finalDamage = attackType == EnemyAttackType.Heavy ? damage * 1.25f : damage;
         currentTarget.TakeDamage(finalDamage, facingDirection);
+        if (VFXManager.Instance != null)
+        {
+            VFXManager.Instance.PlayHitEffect(currentTarget.transform.position, facingDirection);
+        }
+
         if (attackType == EnemyAttackType.Heavy)
         {
             currentTarget.ApplyKnockback(facingDirection, 4f);
@@ -340,4 +357,3 @@ public class ShadowSoldier : MonoBehaviour
         rb.linearVelocity = velocity;
     }
 }
-

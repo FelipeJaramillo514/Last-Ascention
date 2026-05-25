@@ -93,7 +93,7 @@ public class MainMenuController : MonoBehaviour
 
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlayMusic(MusicTrackId.Hub, 1f);
+            AudioManager.Instance.PlayMusic(MusicTrackId.Menu, 1f);
         }
     }
 
