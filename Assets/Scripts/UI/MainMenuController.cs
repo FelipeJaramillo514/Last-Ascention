@@ -13,6 +13,13 @@ public class MainMenuController : MonoBehaviour
     private const string MenuBackgroundResourcePath = "Menu/MenuBackground";
     private const string TitleLogoResourcePath = "Menu/LastAscentionTitle";
     private const float MenuBackgroundPixelsPerUnit = 76.8f;
+    private const float MenuCanvasWidth = 1280f;
+    private const float MenuCanvasHeight = 720f;
+    private const float EmbeddedButtonSlotX = 69f;
+    private const float EmbeddedButtonSlotY = 518f;
+    private const float EmbeddedButtonSlotWidth = 228f;
+    private const float EmbeddedButtonSlotHeight = 38f;
+    private const float EmbeddedButtonSlotSpacing = 48.75f;
 
     [SerializeField] private Camera menuCamera;
     [SerializeField] private Transform backgroundRoot;
@@ -476,29 +483,29 @@ public class MainMenuController : MonoBehaviour
     {
         if (panelBackgroundImage != null)
         {
-            SetRectTransform(panelBackgroundImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1280f, 720f));
+            SetRectTransform(panelBackgroundImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(MenuCanvasWidth, MenuCanvasHeight));
         }
 
         if (vignetteImage != null)
         {
-            SetRectTransform(vignetteImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1280f, 720f));
+            SetRectTransform(vignetteImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(MenuCanvasWidth, MenuCanvasHeight));
         }
 
         if (titlePanel != null)
         {
-            SetRectTransform(titlePanel, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(56f, -48f), new Vector2(780f, 240f));
+            SetRectTransform(titlePanel, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -22f), new Vector2(760f, 228f));
         }
 
         if (titleLogoImage != null)
         {
-            SetRectTransform(titleLogoImage.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 52f), new Vector2(740f, 190f));
+            SetRectTransform(titleLogoImage.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -2f), new Vector2(680f, 199f));
             titleLogoImage.preserveAspect = true;
             titleLogoTargetPosition = titleLogoImage.rectTransform.anchoredPosition;
         }
 
         if (titleText != null)
         {
-            SetRectTransform(titleText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 28f), new Vector2(720f, 96f));
+            SetRectTransform(titleText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -24f), new Vector2(720f, 96f));
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.fontSize = 76f;
             titleTargetPosition = titleText.rectTransform.anchoredPosition;
@@ -506,36 +513,48 @@ public class MainMenuController : MonoBehaviour
 
         if (subtitleText != null)
         {
-            SetRectTransform(subtitleText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(4f, -72f), new Vector2(690f, 30f));
+            SetRectTransform(subtitleText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(20f, -188f), new Vector2(560f, 26f));
             subtitleText.alignment = TextAlignmentOptions.Left;
-            subtitleText.fontSize = 17f;
+            subtitleText.fontSize = 15f;
         }
 
         if (scanlineRect != null)
         {
-            SetRectTransform(scanlineRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, -106f), new Vector2(700f, 3f));
+            SetRectTransform(scanlineRect, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -214f), new Vector2(540f, 3f));
         }
 
         if (buttonsPanel != null)
         {
-            SetRectTransform(buttonsPanel, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(74f, -300f), new Vector2(374f, hasSave ? 288f : 218f));
+            if (usingMenuBackgroundSprite)
+            {
+                SetButtonsPanelLayoutDrivers(false);
+                SetRectTransform(buttonsPanel, new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(MenuCanvasWidth, MenuCanvasHeight));
+                ClearPanelChrome(buttonsPanel);
+            }
+            else
+            {
+                SetButtonsPanelLayoutDrivers(true);
+                SetRectTransform(buttonsPanel, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(74f, -300f), new Vector2(374f, hasSave ? 288f : 218f));
+            }
         }
 
-        float buttonWidth = 340f;
-        float buttonHeight = 54f;
-        float spacing = 66f;
+        float buttonWidth = usingMenuBackgroundSprite ? EmbeddedButtonSlotWidth : 340f;
+        float buttonHeight = usingMenuBackgroundSprite ? EmbeddedButtonSlotHeight : 54f;
+        float spacing = usingMenuBackgroundSprite ? EmbeddedButtonSlotSpacing : 66f;
         if (hasSave)
         {
-            ConfigureButtonLayout(continueButton, new Vector2(0f, 0f), buttonWidth, buttonHeight, false);
-            ConfigureButtonLayout(newGameButton, new Vector2(0f, -spacing), buttonWidth, buttonHeight, true);
-            ConfigureButtonLayout(optionsButton, new Vector2(0f, -(spacing * 2f)), buttonWidth, buttonHeight, false);
-            ConfigureButtonLayout(exitButton, new Vector2(0f, -(spacing * 3f)), buttonWidth, buttonHeight, false);
+            float startY = usingMenuBackgroundSprite ? 500f : 0f;
+            float saveSpacing = usingMenuBackgroundSprite ? 46f : spacing;
+            ConfigureButtonLayout(continueButton, GetButtonSlotPosition(0, startY, saveSpacing), buttonWidth, usingMenuBackgroundSprite ? 36f : buttonHeight, false, usingMenuBackgroundSprite);
+            ConfigureButtonLayout(newGameButton, GetButtonSlotPosition(1, startY, saveSpacing), buttonWidth, usingMenuBackgroundSprite ? 36f : buttonHeight, true, usingMenuBackgroundSprite);
+            ConfigureButtonLayout(optionsButton, GetButtonSlotPosition(2, startY, saveSpacing), buttonWidth, usingMenuBackgroundSprite ? 36f : buttonHeight, false, usingMenuBackgroundSprite);
+            ConfigureButtonLayout(exitButton, GetButtonSlotPosition(3, startY, saveSpacing), buttonWidth, usingMenuBackgroundSprite ? 36f : buttonHeight, false, usingMenuBackgroundSprite);
         }
         else
         {
-            ConfigureButtonLayout(newGameButton, new Vector2(0f, 0f), buttonWidth, buttonHeight, false);
-            ConfigureButtonLayout(optionsButton, new Vector2(0f, -spacing), buttonWidth, buttonHeight, false);
-            ConfigureButtonLayout(exitButton, new Vector2(0f, -(spacing * 2f)), buttonWidth, buttonHeight, false);
+            ConfigureButtonLayout(newGameButton, GetButtonSlotPosition(0, EmbeddedButtonSlotY, spacing), buttonWidth, buttonHeight, false, usingMenuBackgroundSprite);
+            ConfigureButtonLayout(optionsButton, GetButtonSlotPosition(1, EmbeddedButtonSlotY, spacing), buttonWidth, buttonHeight, false, usingMenuBackgroundSprite);
+            ConfigureButtonLayout(exitButton, GetButtonSlotPosition(2, EmbeddedButtonSlotY, spacing), buttonWidth, buttonHeight, false, usingMenuBackgroundSprite);
         }
 
         if (saveInfoPanel != null)
@@ -557,7 +576,22 @@ public class MainMenuController : MonoBehaviour
         ApplyMenuFrames();
     }
 
+    private Vector2 GetButtonSlotPosition(int index, float startY, float spacing)
+    {
+        if (!usingMenuBackgroundSprite)
+        {
+            return new Vector2(0f, -(spacing * index));
+        }
+
+        return new Vector2(EmbeddedButtonSlotX, -(startY + spacing * index));
+    }
+
     private void ConfigureButtonLayout(Button button, Vector2 anchoredPosition, float width, float height, bool showSubLabel)
+    {
+        ConfigureButtonLayout(button, anchoredPosition, width, height, showSubLabel, false);
+    }
+
+    private void ConfigureButtonLayout(Button button, Vector2 anchoredPosition, float width, float height, bool showSubLabel, bool useTopLeftAnchor)
     {
         if (button == null)
         {
@@ -567,18 +601,29 @@ public class MainMenuController : MonoBehaviour
         RectTransform rect = button.GetComponent<RectTransform>();
         if (rect != null)
         {
-            SetRectTransform(rect, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), anchoredPosition, new Vector2(width, height));
+            SetRectTransform(rect, useTopLeftAnchor ? new Vector2(0f, 1f) : new Vector2(0.5f, 1f), useTopLeftAnchor ? new Vector2(0f, 1f) : new Vector2(0.5f, 1f), anchoredPosition, new Vector2(width, height));
         }
 
+        LayoutElement layoutElement = button.GetComponent<LayoutElement>();
+        if (layoutElement != null)
+        {
+            layoutElement.ignoreLayout = useTopLeftAnchor;
+            layoutElement.preferredWidth = width;
+            layoutElement.preferredHeight = height;
+        }
+
+        float labelFontSize = useTopLeftAnchor ? (showSubLabel ? 12.5f : 14.5f) : 21f;
+        float labelX = useTopLeftAnchor ? 38f : 58f;
+        float cursorX = useTopLeftAnchor ? 13f : 18f;
         Transform labelTransform = button.transform.Find("Label");
         if (labelTransform != null)
         {
             TextMeshProUGUI label = labelTransform.GetComponent<TextMeshProUGUI>();
             if (label != null)
             {
-                SetRectTransform(label.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), showSubLabel ? new Vector2(58f, 8f) : new Vector2(58f, 0f), new Vector2(260f, showSubLabel ? 20f : 28f));
+                SetRectTransform(label.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), showSubLabel ? new Vector2(labelX, useTopLeftAnchor ? 5f : 8f) : new Vector2(labelX, 0f), new Vector2(useTopLeftAnchor ? 170f : 260f, showSubLabel ? 20f : 28f));
                 label.alignment = TextAlignmentOptions.Left;
-                label.fontSize = 21f;
+                label.fontSize = labelFontSize;
             }
         }
 
@@ -589,17 +634,17 @@ public class MainMenuController : MonoBehaviour
             if (cursorText != null)
             {
                 cursorText.text = ">";
-                SetRectTransform(cursorText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), showSubLabel ? new Vector2(18f, 8f) : new Vector2(18f, 0f), new Vector2(24f, 24f));
+                SetRectTransform(cursorText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), showSubLabel ? new Vector2(cursorX, useTopLeftAnchor ? 5f : 8f) : new Vector2(cursorX, 0f), new Vector2(24f, 24f));
                 cursorText.alignment = TextAlignmentOptions.Center;
-                cursorText.fontSize = 20f;
+                cursorText.fontSize = useTopLeftAnchor ? 14f : 20f;
             }
         }
 
         if (button == newGameButton && newGameSubLabel != null)
         {
-            SetRectTransform(newGameSubLabel.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(58f, -13f), new Vector2(250f, 14f));
+            SetRectTransform(newGameSubLabel.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), useTopLeftAnchor ? new Vector2(38f, -8f) : new Vector2(58f, -13f), new Vector2(useTopLeftAnchor ? 170f : 250f, 14f));
             newGameSubLabel.alignment = TextAlignmentOptions.Left;
-            newGameSubLabel.fontSize = 10f;
+            newGameSubLabel.fontSize = useTopLeftAnchor ? 7.5f : 10f;
         }
     }
 
@@ -615,6 +660,29 @@ public class MainMenuController : MonoBehaviour
         rect.pivot = pivot;
         rect.anchoredPosition = anchoredPosition;
         rect.sizeDelta = sizeDelta;
+    }
+
+    private void SetButtonsPanelLayoutDrivers(bool enabled)
+    {
+        if (buttonsPanel == null)
+        {
+            return;
+        }
+
+        LayoutGroup[] layoutGroups = buttonsPanel.GetComponents<LayoutGroup>();
+        for (int i = 0; i < layoutGroups.Length; i++)
+        {
+            if (layoutGroups[i] != null)
+            {
+                layoutGroups[i].enabled = enabled;
+            }
+        }
+
+        ContentSizeFitter fitter = buttonsPanel.GetComponent<ContentSizeFitter>();
+        if (fitter != null)
+        {
+            fitter.enabled = enabled;
+        }
     }
 
     private void ConfigureButtons()
@@ -905,25 +973,35 @@ public class MainMenuController : MonoBehaviour
             return;
         }
 
+        Color resolvedBackground = usingMenuBackgroundSprite ? new Color(0f, 0f, 0f, 0.04f) : backgroundColor;
+        Color resolvedText = usingMenuBackgroundSprite ? new Color(0.72f, 0.96f, 1f, 1f) : textColor;
         Image image = button.GetComponent<Image>();
         if (image != null)
         {
-            image.color = backgroundColor;
+            image.color = resolvedBackground;
         }
 
         MainMenuButtonFeedback feedback = button.GetComponent<MainMenuButtonFeedback>();
         if (feedback != null)
         {
-            feedback.SetVisualColors(backgroundColor, textColor);
+            feedback.SetVisualColors(resolvedBackground, resolvedText);
         }
 
-        ApplyButtonChrome(button, backgroundColor);
+        ApplyButtonChrome(button, usingMenuBackgroundSprite ? new Color(0.02f, 0.58f, 0.78f, 0.72f) : backgroundColor);
     }
 
     private void ApplyMenuFrames()
     {
-        ApplyPanelChrome(titlePanel, new Color(0.012f, 0.018f, 0.028f, 0.66f), new Color(1f, 0.52f, 0.16f, 0.76f));
-        ApplyPanelChrome(buttonsPanel, new Color(0.015f, 0.021f, 0.032f, 0.72f), new Color(0.2f, 0.8f, 1f, 0.56f));
+        if (usingMenuBackgroundSprite)
+        {
+            ClearPanelChrome(titlePanel);
+            ClearPanelChrome(buttonsPanel);
+        }
+        else
+        {
+            ApplyPanelChrome(titlePanel, new Color(0.012f, 0.018f, 0.028f, 0.66f), new Color(1f, 0.52f, 0.16f, 0.76f));
+            ApplyPanelChrome(buttonsPanel, new Color(0.015f, 0.021f, 0.032f, 0.72f), new Color(0.2f, 0.8f, 1f, 0.56f));
+        }
 
         if (saveInfoPanel != null)
         {
@@ -939,6 +1017,31 @@ public class MainMenuController : MonoBehaviour
         if (confirmationCard != null)
         {
             ApplyPanelChrome(confirmationCard, new Color(0.035f, 0.025f, 0.028f, 0.94f), new Color(1f, 0.52f, 0.2f, 0.8f));
+        }
+    }
+
+    private void ClearPanelChrome(RectTransform rect)
+    {
+        if (rect == null)
+        {
+            return;
+        }
+
+        Image image = rect.GetComponent<Image>();
+        if (image != null)
+        {
+            image.color = Color.clear;
+            image.raycastTarget = false;
+        }
+
+        string[] lineNames = { "BorderTop", "BorderBottom", "BorderLeft" };
+        for (int i = 0; i < lineNames.Length; i++)
+        {
+            Transform line = rect.Find(lineNames[i]);
+            if (line != null)
+            {
+                line.gameObject.SetActive(false);
+            }
         }
     }
 
@@ -987,6 +1090,10 @@ public class MainMenuController : MonoBehaviour
         if (image != null)
         {
             image.sprite = GetWhiteSprite();
+            if (usingMenuBackgroundSprite)
+            {
+                image.color = new Color(0f, 0f, 0f, 0.04f);
+            }
         }
 
         Outline outline = button.GetComponent<Outline>();
@@ -995,16 +1102,18 @@ public class MainMenuController : MonoBehaviour
             outline = button.gameObject.AddComponent<Outline>();
         }
 
-        outline.effectColor = new Color(0f, 0f, 0f, 0.86f);
-        outline.effectDistance = new Vector2(2f, -2f);
+        outline.effectColor = usingMenuBackgroundSprite ? new Color(0f, 0.85f, 1f, 0.2f) : new Color(0f, 0f, 0f, 0.86f);
+        outline.effectDistance = usingMenuBackgroundSprite ? new Vector2(1f, -1f) : new Vector2(2f, -2f);
 
         RectTransform accent = EnsureButtonChildImage(button.transform, "Accent", new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(5f, 0f));
         Image accentImage = accent.GetComponent<Image>();
-        accentImage.color = new Color(Mathf.Clamp01(accentColor.r + 0.15f), Mathf.Clamp01(accentColor.g + 0.15f), Mathf.Clamp01(accentColor.b + 0.15f), 1f);
+        accentImage.color = usingMenuBackgroundSprite
+            ? new Color(0f, 0.8f, 1f, 0.55f)
+            : new Color(Mathf.Clamp01(accentColor.r + 0.15f), Mathf.Clamp01(accentColor.g + 0.15f), Mathf.Clamp01(accentColor.b + 0.15f), 1f);
 
         RectTransform topLine = EnsureButtonChildImage(button.transform, "TopLine", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(0f, 2f));
         Image topLineImage = topLine.GetComponent<Image>();
-        topLineImage.color = new Color(1f, 1f, 1f, 0.18f);
+        topLineImage.color = usingMenuBackgroundSprite ? new Color(0.74f, 0.95f, 1f, 0.12f) : new Color(1f, 1f, 1f, 0.18f);
     }
 
     private RectTransform EnsureButtonChildImage(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
@@ -1335,6 +1444,13 @@ public class MainMenuController : MonoBehaviour
     {
         if (cache != null)
         {
+            return cache;
+        }
+
+        Sprite importedSprite = Resources.Load<Sprite>(resourcePath);
+        if (importedSprite != null)
+        {
+            cache = importedSprite;
             return cache;
         }
 

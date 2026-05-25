@@ -153,7 +153,7 @@ public class RunManager : MonoBehaviour
         EventBus.Subscribe<PlayerDeathEvent>(OnPlayerDeath);
         EventBus.Subscribe<EnemyDiedEvent>(OnEnemyDied);
         EventBus.Subscribe<RoomClearedEvent>(OnRoomCleared);
-        EventBus.Subscribe<ShadowSummonedEvent>(OnShadowSummoned);
+        EventBus.Subscribe<ShadowExtractedEvent>(OnShadowExtracted);
         EventBus.Subscribe<PlayerLevelUpEvent>(OnPlayerLevelUp);
     }
 
@@ -163,7 +163,7 @@ public class RunManager : MonoBehaviour
         EventBus.Unsubscribe<PlayerDeathEvent>(OnPlayerDeath);
         EventBus.Unsubscribe<EnemyDiedEvent>(OnEnemyDied);
         EventBus.Unsubscribe<RoomClearedEvent>(OnRoomCleared);
-        EventBus.Unsubscribe<ShadowSummonedEvent>(OnShadowSummoned);
+        EventBus.Unsubscribe<ShadowExtractedEvent>(OnShadowExtracted);
         EventBus.Unsubscribe<PlayerLevelUpEvent>(OnPlayerLevelUp);
     }
 
@@ -331,7 +331,7 @@ public class RunManager : MonoBehaviour
         currentRunStats.roomsCleared++;
     }
 
-    private void OnShadowSummoned(ShadowSummonedEvent shadowEvent)
+    private void OnShadowExtracted(ShadowExtractedEvent shadowEvent)
     {
         if (!runActive)
         {

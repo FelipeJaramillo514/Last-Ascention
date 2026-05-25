@@ -193,10 +193,49 @@ public class BossPhase2Event
 public class ShadowSummonedEvent
 {
     public ShadowSoldier soldier { get; }
+    public DungeonRoom sourceRoom { get; }
+    public Vector2 position { get; }
 
     public ShadowSummonedEvent(ShadowSoldier soldier)
+        : this(soldier, null, soldier != null ? (Vector2)soldier.transform.position : Vector2.zero)
+    {
+    }
+
+    public ShadowSummonedEvent(ShadowSoldier soldier, DungeonRoom sourceRoom, Vector2 position)
     {
         this.soldier = soldier;
+        this.sourceRoom = sourceRoom;
+        this.position = position;
+    }
+}
+
+public class ShadowExtractedEvent
+{
+    public DungeonRoom sourceRoom { get; }
+    public Vector2 position { get; }
+    public string soulName { get; }
+    public int storedCount { get; }
+
+    public ShadowExtractedEvent(DungeonRoom sourceRoom, Vector2 position, string soulName, int storedCount)
+    {
+        this.sourceRoom = sourceRoom;
+        this.position = position;
+        this.soulName = soulName;
+        this.storedCount = storedCount;
+    }
+}
+
+public class ShadowInventoryChangedEvent
+{
+    public int storedSouls { get; }
+    public int activeShadows { get; }
+    public int maxActiveShadows { get; }
+
+    public ShadowInventoryChangedEvent(int storedSouls, int activeShadows, int maxActiveShadows)
+    {
+        this.storedSouls = storedSouls;
+        this.activeShadows = activeShadows;
+        this.maxActiveShadows = maxActiveShadows;
     }
 }
 

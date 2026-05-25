@@ -9,6 +9,7 @@ public class ShadowExtractionSystem : MonoBehaviour
     [Header("Necromancy")]
     [SerializeField] private bool requireNecromancyUnlock;
     [SerializeField] private int maxShadows = 3;
+    [SerializeField] private int maxStoredSouls = 12;
     [SerializeField] private float extractRange = 2.75f;
     [SerializeField] private float holdDuration = 1.15f;
     [SerializeField] private GameObject shadowSoldierPrefab;
@@ -19,7 +20,47 @@ public class ShadowExtractionSystem : MonoBehaviour
     [SerializeField] private Image progressFill;
     [SerializeField] private Text promptText;
 
+    [System.Serializable]
+    public class ExtractedSoul
+    {
+        public EnemyData sourceData;
+        public Sprite sprite;
+        public Color sourceColor = Color.white;
+        public Vector2 colliderSize = new Vector2(0.8f, 0.9f);
+        public Vector2 colliderOffset;
+        public Vector2 facingDirection = Vector2.right;
+        public string displayName = "Sombra";
+
+        public ExtractedSoul(EnemyBase sourceEnemy)
+        {
+            if (sourceEnemy == null)
+            {
+                return;
+            }
+
+            sourceData = sourceEnemy.Data != null ? ScriptableObject.Instantiate(sourceEnemy.Data) : null;
+            displayName = sourceData != null && !string.IsNullOrEmpty(sourceData.enemyName) ? sourceData.enemyName : "Enemigo";
+            sprite = sourceEnemy.CurrentSprite;
+            facingDirection = sourceEnemy.transform.right;
+
+            SpriteRenderer renderer = sourceEnemy.GetComponent<SpriteRenderer>();
+            if (renderer != null)
+            {
+                sprite = sprite != null ? sprite : renderer.sprite;
+                sourceColor = renderer.color;
+            }
+
+            CapsuleCollider2D sourceCollider = sourceEnemy.GetComponent<CapsuleCollider2D>();
+            if (sourceCollider != null)
+            {
+                colliderSize = sourceCollider.size;
+                colliderOffset = sourceCollider.offset;
+            }
+        }
+    }
+
     private readonly List<ShadowSoldier> activeShadows = new List<ShadowSoldier>();
+    private readonly List<ExtractedSoul> storedSouls = new List<ExtractedSoul>();
     private readonly List<EnemyBase> deadEnemies = new List<EnemyBase>();
 
     private KaisenController owner;
@@ -31,6 +72,7 @@ public class ShadowExtractionSystem : MonoBehaviour
 
     public List<ShadowSoldier> ActiveShadows { get { return activeShadows; } }
     public int ActiveShadowCount { get { return activeShadows.Count; } }
+    public int StoredSoulCount { get { return storedSouls.Count; } }
     public int MaxShadows
     {
         get
@@ -45,6 +87,7 @@ public class ShadowExtractionSystem : MonoBehaviour
         owner = GetComponent<KaisenController>();
         mainCamera = Camera.main;
         maxShadows = Mathf.Max(3, maxShadows);
+        maxStoredSouls = maxStoredSouls > 0 ? maxStoredSouls : 12;
         extractRange = Mathf.Max(2.5f, extractRange);
         holdDuration = Mathf.Clamp(holdDuration, 0.75f, 1.2f);
         EnsureUi();
@@ -71,20 +114,12 @@ public class ShadowExtractionSystem : MonoBehaviour
             return;
         }
 
-        if (activeShadows.Count >= MaxShadows)
+        if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
         {
-            currentCandidate = FindNearestCandidate(false);
-            if (currentCandidate != null && extractRoutine == null)
-            {
-                UpdateProgressUi(currentCandidate.transform.position, 1f, "LIMITE DE ALMAS " + activeShadows.Count + "/" + MaxShadows);
-                return;
-            }
-
-            HideUi();
-            return;
+            TrySummonStoredSoul();
         }
 
-        currentCandidate = FindNearestCandidate(true);
+        currentCandidate = FindNearestCandidate();
         if (currentCandidate == null)
         {
             HideUi();
@@ -99,7 +134,7 @@ public class ShadowExtractionSystem : MonoBehaviour
         if (extractRoutine == null)
         {
             holdProgress = 0f;
-            UpdateProgressUi(currentCandidate.transform.position, 0f, "MANTEN [E] LEVANTAR");
+            UpdateProgressUi(currentCandidate.transform.position, 0f, "MANTEN [E] EXTRAER");
         }
     }
 
@@ -130,6 +165,7 @@ public class ShadowExtractionSystem : MonoBehaviour
         }
 
         activeShadows.Remove(shadowDiedEvent.soldier);
+        PublishInventoryChanged();
     }
 
     private IEnumerator ExtractShadow(EnemyBase deadEnemy)
@@ -160,20 +196,24 @@ public class ShadowExtractionSystem : MonoBehaviour
             yield return null;
         }
 
-        Vector3 spawnPosition = deadEnemy.transform.position;
-        ShadowSoldier soldier = SpawnShadowSoldier(deadEnemy, spawnPosition);
-        if (soldier != null)
+        Vector3 extractionPosition = deadEnemy.transform.position;
+        DungeonRoom sourceRoom = deadEnemy.GetComponentInParent<DungeonRoom>();
+        ExtractedSoul extractedSoul = new ExtractedSoul(deadEnemy);
+        if (storedSouls.Count >= maxStoredSouls)
         {
-            activeShadows.Add(soldier);
-            EventBus.Publish(new ShadowSummonedEvent(soldier));
-            if (NotificationSystem.Instance != null)
-            {
-                string sourceName = deadEnemy.Data != null ? deadEnemy.Data.enemyName : "Enemigo";
-                NotificationSystem.Instance.ShowNotification("ALMA LEVANTADA: " + sourceName, new Color(0.25f, 1f, 0.9f, 1f), 1.4f);
-            }
+            storedSouls.RemoveAt(0);
         }
 
-        SpawnExtractionParticles(spawnPosition);
+        storedSouls.Add(extractedSoul);
+        EventBus.Publish(new ShadowExtractedEvent(sourceRoom, (Vector2)extractionPosition, extractedSoul.displayName, storedSouls.Count));
+        PublishInventoryChanged();
+
+        if (NotificationSystem.Instance != null)
+        {
+            NotificationSystem.Instance.ShowNotification("ALMA EXTRAIDA: " + extractedSoul.displayName + " (" + storedSouls.Count + ")", new Color(0.25f, 1f, 0.9f, 1f), 1.4f);
+        }
+
+        SpawnExtractionParticles(extractionPosition);
         deadEnemies.Remove(deadEnemy);
         deadEnemy.MarkShadowExtracted();
         HideUi();
@@ -181,7 +221,59 @@ public class ShadowExtractionSystem : MonoBehaviour
         extractRoutine = null;
     }
 
-    private ShadowSoldier SpawnShadowSoldier(EnemyBase sourceEnemy, Vector3 spawnPosition)
+    private void TrySummonStoredSoul()
+    {
+        if (storedSouls.Count == 0)
+        {
+            if (NotificationSystem.Instance != null)
+            {
+                NotificationSystem.Instance.ShowNotification("NO HAY ALMAS EXTRAIDAS", new Color(0.7f, 0.95f, 1f, 1f), 1.1f);
+            }
+            return;
+        }
+
+        if (activeShadows.Count >= MaxShadows)
+        {
+            if (NotificationSystem.Instance != null)
+            {
+                NotificationSystem.Instance.ShowNotification("SUBDITOS AL LIMITE " + activeShadows.Count + "/" + MaxShadows, new Color(1f, 0.76f, 0.25f, 1f), 1.1f);
+            }
+            PublishInventoryChanged();
+            return;
+        }
+
+        int soulIndex = storedSouls.Count - 1;
+        ExtractedSoul soul = storedSouls[soulIndex];
+        storedSouls.RemoveAt(soulIndex);
+
+        Vector3 spawnPosition = GetSummonPosition();
+        ShadowSoldier soldier = SpawnShadowSoldier(soul, spawnPosition);
+        if (soldier == null)
+        {
+            storedSouls.Add(soul);
+            PublishInventoryChanged();
+            return;
+        }
+
+        activeShadows.Add(soldier);
+        EventBus.Publish(new ShadowSummonedEvent(soldier, null, (Vector2)spawnPosition));
+        PublishInventoryChanged();
+
+        if (NotificationSystem.Instance != null)
+        {
+            NotificationSystem.Instance.ShowNotification("SOMBRA INVOCADA: " + soul.displayName, new Color(0.15f, 0.88f, 1f, 1f), 1.25f);
+        }
+    }
+
+    private Vector3 GetSummonPosition()
+    {
+        Vector2 origin = owner != null ? (Vector2)owner.transform.position : (Vector2)transform.position;
+        Vector2 direction = owner != null && owner.AimDirection.sqrMagnitude > 0.001f ? owner.AimDirection.normalized : Vector2.right;
+        Vector2 sideOffset = Vector2.Perpendicular(direction) * Random.Range(-0.35f, 0.35f);
+        return origin + direction * 1.35f + sideOffset;
+    }
+
+    private ShadowSoldier SpawnShadowSoldier(ExtractedSoul soul, Vector3 spawnPosition)
     {
         GameObject shadowObject = shadowSoldierPrefab != null ? Instantiate(shadowSoldierPrefab, spawnPosition, Quaternion.identity) : new GameObject("ShadowSoldier");
         ShadowSoldier soldier = shadowObject.GetComponent<ShadowSoldier>();
@@ -191,18 +283,18 @@ public class ShadowExtractionSystem : MonoBehaviour
         }
 
         float orbitOffset = activeShadows.Count * 90f;
-        soldier.InitializeFromEnemy(sourceEnemy, owner, orbitOffset);
+        soldier.InitializeFromSoul(soul, owner, orbitOffset, spawnPosition);
         return soldier;
     }
 
-    private EnemyBase FindNearestCandidate(bool requireFreeSlot)
+    private EnemyBase FindNearestCandidate()
     {
         EnemyBase nearest = null;
         float nearestDistance = float.MaxValue;
         for (int i = deadEnemies.Count - 1; i >= 0; i--)
         {
             EnemyBase enemy = deadEnemies[i];
-            if (!CanExtract(enemy, requireFreeSlot))
+            if (!CanExtract(enemy))
             {
                 continue;
             }
@@ -220,15 +312,9 @@ public class ShadowExtractionSystem : MonoBehaviour
 
     private bool CanExtract(EnemyBase enemy)
     {
-        return CanExtract(enemy, true);
-    }
-
-    private bool CanExtract(EnemyBase enemy, bool requireFreeSlot)
-    {
         return enemy != null
             && enemy.IsAvailableForShadowExtraction
-            && Vector2.Distance(transform.position, enemy.transform.position) <= extractRange
-            && (!requireFreeSlot || activeShadows.Count < MaxShadows);
+            && Vector2.Distance(transform.position, enemy.transform.position) <= extractRange;
     }
 
     private bool CanRaiseEnemy(EnemyBase enemy)
@@ -257,6 +343,11 @@ public class ShadowExtractionSystem : MonoBehaviour
                 activeShadows.RemoveAt(i);
             }
         }
+    }
+
+    private void PublishInventoryChanged()
+    {
+        EventBus.Publish(new ShadowInventoryChangedEvent(storedSouls.Count, activeShadows.Count, MaxShadows));
     }
 
     private void SpawnExtractionParticles(Vector3 worldPosition)

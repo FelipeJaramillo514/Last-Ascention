@@ -909,7 +909,6 @@ MonoBehaviour:
   weaponDropTable:
   - {fileID: 11400000, guid: 6b98bc996c912c54aae6d27e22fde3d7, type: 2}
   - {fileID: 11400000, guid: 4e1f6a9454d132244b07a9629a030176, type: 2}
-  - {fileID: 11400000, guid: bebff651aa656d94581a78b9eb8f68f6, type: 2}
   scatterRadius: 0.45
   scatterImpulse: 0.75
 --- !u!114 &1376629154

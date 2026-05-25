@@ -4,7 +4,9 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D), typeof(SpriteRenderer))]
 public class ShadowSoldier : MonoBehaviour
 {
-    private static readonly Color NecromancyTint = new Color(0.22f, 0.95f, 0.88f, 0.92f);
+    private static readonly Color NecromancyTint = new Color(0.05f, 0.42f, 0.72f, 0.9f);
+    private static readonly Color AllyMarkerTint = new Color(0f, 0.95f, 1f, 0.68f);
+    private static Sprite allyMarkerSprite;
 
     private enum ShadowState
     {
@@ -24,6 +26,7 @@ public class ShadowSoldier : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private CapsuleCollider2D capsuleCollider;
     [SerializeField] private Light2D eyeLight;
+    [SerializeField] private SpriteRenderer allyMarkerRenderer;
 
     private KaisenController owner;
     private EnemyData sourceData;
@@ -64,13 +67,16 @@ public class ShadowSoldier : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         gameObject.layer = LayerMask.NameToLayer("Shadow_Soldier");
-        chaseRange = Mathf.Max(9.5f, chaseRange);
+        chaseRange = Mathf.Max(12.5f, chaseRange);
         currentHP = maxHP;
         EnsureEyeLight();
+        EnsureAllyMarker();
     }
 
     private void Update()
     {
+        UpdateAllyMarker();
+
         if (owner == null)
         {
             return;
@@ -133,6 +139,9 @@ public class ShadowSoldier : MonoBehaviour
             currentHP = maxHP;
             damage = Mathf.Max(8f, sourceData.damage * 0.85f);
             moveSpeed = Mathf.Max(2.4f, sourceData.moveSpeed * 0.95f);
+            chaseRange = Mathf.Max(chaseRange, sourceData.detectionRange + 4f);
+            rangedRange = Mathf.Max(rangedRange, sourceData.attackRange);
+            attackCooldown = Mathf.Max(0.35f, sourceData.attackCooldown * 0.9f);
             attackType = sourceData.attackType;
             name = "Necromancy_" + sourceData.enemyName.Replace(" ", string.Empty);
         }
@@ -164,12 +173,66 @@ public class ShadowSoldier : MonoBehaviour
 
         if (spriteRenderer != null)
         {
-            spriteRenderer.color = Color.Lerp(sourceColor, NecromancyTint, 0.72f);
+            spriteRenderer.color = Color.Lerp(sourceColor, NecromancyTint, 0.84f);
             spriteRenderer.sortingLayerName = "Characters";
             spriteRenderer.sortingOrder = 3;
         }
 
         EnsureEyeLight();
+        EnsureAllyMarker();
+    }
+
+    public void InitializeFromSoul(ShadowExtractionSystem.ExtractedSoul soul, KaisenController ownerController, float orbitOffsetDegrees, Vector3 spawnPosition)
+    {
+        owner = ownerController;
+        sourceData = soul != null ? soul.sourceData : null;
+        orbitAngle = orbitOffsetDegrees;
+        currentHP = maxHP;
+        transform.position = spawnPosition;
+
+        if (sourceData != null)
+        {
+            maxHP = Mathf.Max(maxHP, sourceData.maxHP * 1.15f);
+            currentHP = maxHP;
+            damage = Mathf.Max(8f, sourceData.damage * 0.85f);
+            moveSpeed = Mathf.Max(2.4f, sourceData.moveSpeed * 0.95f);
+            chaseRange = Mathf.Max(chaseRange, sourceData.detectionRange + 4f);
+            rangedRange = Mathf.Max(rangedRange, sourceData.attackRange);
+            attackCooldown = Mathf.Max(0.35f, sourceData.attackCooldown * 0.9f);
+            attackType = sourceData.attackType;
+        }
+
+        if (soul != null)
+        {
+            name = "ShadowSubdit_" + soul.displayName.Replace(" ", string.Empty);
+            facingDirection = soul.facingDirection.sqrMagnitude > 0.001f ? soul.facingDirection.normalized : Vector2.right;
+
+            if (spriteRenderer != null && soul.sprite != null)
+            {
+                spriteRenderer.sprite = soul.sprite;
+            }
+
+            if (capsuleCollider != null)
+            {
+                capsuleCollider.size = soul.colliderSize;
+                capsuleCollider.offset = soul.colliderOffset;
+            }
+        }
+        else if (sourceData != null)
+        {
+            name = "ShadowSubdit_" + sourceData.enemyName.Replace(" ", string.Empty);
+        }
+
+        Color sourceColor = soul != null ? soul.sourceColor : Color.white;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.Lerp(sourceColor, NecromancyTint, 0.84f);
+            spriteRenderer.sortingLayerName = "Characters";
+            spriteRenderer.sortingOrder = 3;
+        }
+
+        EnsureEyeLight();
+        EnsureAllyMarker();
     }
 
     public void TakeDamage(float amount)
@@ -191,7 +254,8 @@ public class ShadowSoldier : MonoBehaviour
         EnemyBase[] enemies = FindObjectsByType<EnemyBase>(FindObjectsSortMode.None);
         EnemyBase nearest = null;
         float nearestDistance = float.MaxValue;
-        Vector2 origin = owner != null ? (Vector2)owner.transform.position : (Vector2)transform.position;
+        Vector2 ownerOrigin = owner != null ? (Vector2)owner.transform.position : (Vector2)transform.position;
+        Vector2 shadowOrigin = transform.position;
         for (int i = 0; i < enemies.Length; i++)
         {
             EnemyBase enemy = enemies[i];
@@ -200,13 +264,13 @@ public class ShadowSoldier : MonoBehaviour
                 continue;
             }
 
-            float distanceToOwner = Vector2.Distance(origin, enemy.transform.position);
-            if (distanceToOwner > chaseRange)
+            float distanceToOwner = Vector2.Distance(ownerOrigin, enemy.transform.position);
+            float distanceToShadow = Vector2.Distance(shadowOrigin, enemy.transform.position);
+            if (distanceToOwner > chaseRange && distanceToShadow > chaseRange)
             {
                 continue;
             }
 
-            float distanceToShadow = Vector2.Distance(transform.position, enemy.transform.position);
             if (distanceToShadow < nearestDistance)
             {
                 nearestDistance = distanceToShadow;
@@ -321,6 +385,75 @@ public class ShadowSoldier : MonoBehaviour
         eyeLight.intensity = 0.8f;
         eyeLight.pointLightOuterRadius = 0.5f;
         eyeLight.pointLightInnerRadius = 0.12f;
+    }
+
+    private void EnsureAllyMarker()
+    {
+        Transform markerTransform = allyMarkerRenderer != null ? allyMarkerRenderer.transform : transform.Find("AllyShadowMarker");
+        if (markerTransform == null)
+        {
+            GameObject markerObject = new GameObject("AllyShadowMarker");
+            markerTransform = markerObject.transform;
+            markerTransform.SetParent(transform, false);
+        }
+
+        markerTransform.localPosition = new Vector3(0f, -0.43f, 0f);
+        allyMarkerRenderer = markerTransform.GetComponent<SpriteRenderer>();
+        if (allyMarkerRenderer == null)
+        {
+            allyMarkerRenderer = markerTransform.gameObject.AddComponent<SpriteRenderer>();
+        }
+
+        allyMarkerRenderer.sprite = GetAllyMarkerSprite();
+        allyMarkerRenderer.color = AllyMarkerTint;
+        allyMarkerRenderer.sortingLayerName = spriteRenderer != null ? spriteRenderer.sortingLayerName : "Characters";
+        allyMarkerRenderer.sortingOrder = spriteRenderer != null ? spriteRenderer.sortingOrder - 1 : 2;
+        markerTransform.localScale = Vector3.one;
+    }
+
+    private void UpdateAllyMarker()
+    {
+        if (allyMarkerRenderer == null)
+        {
+            return;
+        }
+
+        float pulse = 0.92f + Mathf.Sin(Time.time * 5.5f) * 0.08f;
+        allyMarkerRenderer.transform.localScale = new Vector3(pulse, pulse, 1f);
+        Color color = AllyMarkerTint;
+        color.a = 0.5f + Mathf.Sin(Time.time * 4.25f) * 0.12f;
+        allyMarkerRenderer.color = color;
+    }
+
+    private static Sprite GetAllyMarkerSprite()
+    {
+        if (allyMarkerSprite != null)
+        {
+            return allyMarkerSprite;
+        }
+
+        const int size = 48;
+        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        texture.filterMode = FilterMode.Point;
+        Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                Vector2 delta = new Vector2(x, y) - center;
+                float distance = delta.magnitude;
+                float outerRing = Mathf.Clamp01(1f - Mathf.Abs(distance - 17.5f) / 2.1f);
+                float innerRing = Mathf.Clamp01(1f - Mathf.Abs(distance - 10.5f) / 1.2f) * 0.32f;
+                float diamond = Mathf.Clamp01(1f - (Mathf.Abs(delta.x) + Mathf.Abs(delta.y + 8f)) / 6.5f) * 0.75f;
+                float alpha = Mathf.Clamp01(Mathf.Max(outerRing, Mathf.Max(innerRing, diamond)));
+                texture.SetPixel(x, y, alpha <= 0.03f ? Color.clear : new Color(1f, 1f, 1f, alpha));
+            }
+        }
+
+        texture.Apply();
+        allyMarkerSprite = Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), size);
+        allyMarkerSprite.name = "AllyShadowMarker";
+        return allyMarkerSprite;
     }
 
     private void Die()

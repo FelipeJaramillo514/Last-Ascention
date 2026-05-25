@@ -187,8 +187,8 @@ public class HealthPanelUI : MonoBehaviour
 
         if (titleText != null)
         {
-            titleText.text = string.Empty;
-            titleText.gameObject.SetActive(false);
+            titleText.text = ResolveHunterName();
+            titleText.gameObject.SetActive(true);
         }
 
         levelText.text = "NV " + cachedController.Stats.systemLevel;
@@ -227,8 +227,8 @@ public class HealthPanelUI : MonoBehaviour
         {
             bool visible = i < visibleHearts;
             heartImages[i].gameObject.SetActive(visible);
-            heartImages[i].rectTransform.anchoredPosition = new Vector2(i * 15f, 0f);
-            heartImages[i].rectTransform.sizeDelta = new Vector2(14f, 14f);
+            heartImages[i].rectTransform.anchoredPosition = new Vector2(i * 13f, 0f);
+            heartImages[i].rectTransform.sizeDelta = new Vector2(12f, 12f);
             if (!visible)
             {
                 continue;
@@ -258,7 +258,7 @@ public class HealthPanelUI : MonoBehaviour
 
     private IEnumerator ShakeHeartRoutine(RectTransform target, int index)
     {
-        Vector2 basePosition = new Vector2(index * 15f, 0f);
+        Vector2 basePosition = new Vector2(index * 13f, 0f);
         float elapsed = 0f;
         while (elapsed < 0.22f)
         {
@@ -283,8 +283,8 @@ public class HealthPanelUI : MonoBehaviour
             rect.anchorMin = new Vector2(0f, 1f);
             rect.anchorMax = new Vector2(0f, 1f);
             rect.pivot = new Vector2(0f, 1f);
-            rect.sizeDelta = new Vector2(14f, 14f);
-            rect.anchoredPosition = new Vector2(heartImages.Count * 15f, 0f);
+            rect.sizeDelta = new Vector2(12f, 12f);
+            rect.anchoredPosition = new Vector2(heartImages.Count * 13f, 0f);
             heartImage.raycastTarget = false;
             heartImages.Add(heartImage);
             shakeRoutines.Add(null);
@@ -449,8 +449,13 @@ public class HealthPanelUI : MonoBehaviour
     {
         if (titleText != null)
         {
-            titleText.text = string.Empty;
-            titleText.gameObject.SetActive(false);
+            titleText.gameObject.SetActive(true);
+            RectTransform titleRect = titleText.rectTransform;
+            titleRect.anchorMin = new Vector2(0f, 1f);
+            titleRect.anchorMax = new Vector2(0f, 1f);
+            titleRect.pivot = new Vector2(0f, 1f);
+            titleRect.anchoredPosition = new Vector2(98f, -14f);
+            titleRect.sizeDelta = new Vector2(128f, 18f);
         }
 
         if (heartsRoot != null)
@@ -458,8 +463,8 @@ public class HealthPanelUI : MonoBehaviour
             heartsRoot.anchorMin = new Vector2(0f, 1f);
             heartsRoot.anchorMax = new Vector2(0f, 1f);
             heartsRoot.pivot = new Vector2(0f, 1f);
-            heartsRoot.anchoredPosition = new Vector2(98f, -20f);
-            heartsRoot.sizeDelta = new Vector2(130f, 16f);
+            heartsRoot.anchoredPosition = new Vector2(174f, -38f);
+            heartsRoot.sizeDelta = new Vector2(92f, 14f);
         }
 
         if (heartCountText != null)
@@ -468,9 +473,45 @@ public class HealthPanelUI : MonoBehaviour
             countRect.anchorMin = new Vector2(0f, 1f);
             countRect.anchorMax = new Vector2(0f, 1f);
             countRect.pivot = new Vector2(0f, 1f);
-            countRect.anchoredPosition = new Vector2(222f, -20f);
+            countRect.anchoredPosition = new Vector2(268f, -38f);
             countRect.sizeDelta = new Vector2(38f, 16f);
         }
+
+        if (rankText != null)
+        {
+            RectTransform rankRect = rankText.rectTransform;
+            rankRect.anchorMin = new Vector2(0f, 1f);
+            rankRect.anchorMax = new Vector2(0f, 1f);
+            rankRect.pivot = new Vector2(0f, 1f);
+            rankRect.anchoredPosition = new Vector2(98f, -36f);
+            rankRect.sizeDelta = new Vector2(74f, 18f);
+        }
+
+        if (levelText != null)
+        {
+            RectTransform levelRect = levelText.rectTransform;
+            levelRect.anchorMin = new Vector2(0f, 1f);
+            levelRect.anchorMax = new Vector2(0f, 1f);
+            levelRect.pivot = new Vector2(0f, 1f);
+            levelRect.anchoredPosition = new Vector2(286f, -14f);
+            levelRect.sizeDelta = new Vector2(44f, 24f);
+        }
+    }
+
+    private string ResolveHunterName()
+    {
+        if (cachedController == null)
+        {
+            return "KAISEN";
+        }
+
+        string objectName = cachedController.gameObject.name.Replace("(Clone)", string.Empty).Trim();
+        if (string.IsNullOrEmpty(objectName) || objectName == "Player")
+        {
+            return "KAISEN";
+        }
+
+        return objectName.ToUpperInvariant();
     }
 
     private Canvas FindOverlayCanvas()

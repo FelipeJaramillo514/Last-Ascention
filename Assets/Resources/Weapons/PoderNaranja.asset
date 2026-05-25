@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PoderNaranja
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: Poder Naranja
-  weaponIcon: {fileID: 0}
+  weaponIcon: {fileID: 7413081266799972411, guid: b45e2602a7b9c524096d9f22799db8ad, type: 3}
   damage: 18
   fireRate: 1.1
   maxAmmo: 45

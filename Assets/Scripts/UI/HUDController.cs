@@ -18,10 +18,27 @@ public class HUDController : MonoBehaviour
     private WeaponManager weaponManager;
     private SystemManager systemManager;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void RegisterSceneBootstrap()
+    {
+        SceneManager.sceneLoaded -= OnRuntimeSceneLoaded;
+        SceneManager.sceneLoaded += OnRuntimeSceneLoaded;
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
     {
-        if (SceneManager.GetActiveScene().name == "MainMenu")
+        EnsureHudForScene(SceneManager.GetActiveScene());
+    }
+
+    private static void OnRuntimeSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        EnsureHudForScene(scene);
+    }
+
+    private static void EnsureHudForScene(Scene scene)
+    {
+        if (scene.name == "MainMenu")
         {
             return;
         }

@@ -46,12 +46,13 @@ public class DungeonRoom : MonoBehaviour
     private int roomIndex;
     private bool ambushPending;
     private bool ambushTriggered;
+    private bool doorsUnlockedByShadowExtraction;
     private int activeEnemyCount;
 
     public RoomData Data { get { return data; } }
     public bool IsCleared { get { return isCleared; } }
     public bool IsVisited { get { return isVisited; } }
-    public bool IsCombatLocked { get { return !isCleared && activeEnemyCount > 0; } }
+    public bool IsCombatLocked { get { return !isCleared && activeEnemyCount > 0 && !doorsUnlockedByShadowExtraction; } }
     public RoomType RuntimeRoomType { get { return runtimeRoomType; } }
     public Vector2Int GridPosition { get { return gridPosition; } }
     public int RoomIndex { get { return roomIndex; } }
@@ -69,11 +70,13 @@ public class DungeonRoom : MonoBehaviour
     private void OnEnable()
     {
         EventBus.Subscribe<EnemyDiedEvent>(OnEnemyDied);
+        EventBus.Subscribe<ShadowExtractedEvent>(OnShadowExtracted);
     }
 
     private void OnDisable()
     {
         EventBus.Unsubscribe<EnemyDiedEvent>(OnEnemyDied);
+        EventBus.Unsubscribe<ShadowExtractedEvent>(OnShadowExtracted);
     }
 
     public void ConfigureRuntime(DungeonBuilder ownerBuilder, DungeonLayout.RoomNode node)
@@ -90,6 +93,7 @@ public class DungeonRoom : MonoBehaviour
         activeEnemyCount = 0;
         ambushTriggered = false;
         ambushPending = false;
+        doorsUnlockedByShadowExtraction = false;
         cachedWaveEnemies.Clear();
         isCleared = false;
 
@@ -383,6 +387,28 @@ public class DungeonRoom : MonoBehaviour
         OnRoomCleared();
     }
 
+    private void OnShadowExtracted(ShadowExtractedEvent shadowExtractedEvent)
+    {
+        if (shadowExtractedEvent == null || isCleared || activeEnemyCount <= 0)
+        {
+            return;
+        }
+
+        bool raisedInThisRoom = shadowExtractedEvent.sourceRoom == this;
+        if (!raisedInThisRoom && shadowExtractedEvent.sourceRoom == null)
+        {
+            raisedInThisRoom = ContainsPoint(shadowExtractedEvent.position);
+        }
+
+        if (!raisedInThisRoom)
+        {
+            return;
+        }
+
+        doorsUnlockedByShadowExtraction = true;
+        OpenActiveDoors();
+    }
+
     private IEnumerator SpawnAmbushRoutine()
     {
         yield return new WaitForSeconds(0.5f);
@@ -401,6 +427,7 @@ public class DungeonRoom : MonoBehaviour
         }
         else
         {
+            doorsUnlockedByShadowExtraction = false;
             CloseActiveDoors();
         }
     }

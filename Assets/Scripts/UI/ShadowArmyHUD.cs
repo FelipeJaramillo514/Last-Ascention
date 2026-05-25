@@ -7,8 +7,16 @@ public class ShadowArmyHUD : MonoBehaviour
 {
     [SerializeField] private Canvas overlayCanvas;
     [SerializeField] private RectTransform container;
+    [SerializeField] private RectTransform statusRoot;
+    [SerializeField] private Text storedCountText;
+    [SerializeField] private Text activeCountText;
+    [SerializeField] private Text summonHintText;
 
     private readonly Dictionary<ShadowSoldier, Image> iconsByShadow = new Dictionary<ShadowSoldier, Image>();
+    private Font uiFont;
+    private int storedSouls;
+    private int activeShadows;
+    private int maxActiveShadows;
 
     private void Awake()
     {
@@ -19,12 +27,15 @@ public class ShadowArmyHUD : MonoBehaviour
     {
         EventBus.Subscribe<ShadowSummonedEvent>(OnShadowSummoned);
         EventBus.Subscribe<ShadowDiedEvent>(OnShadowDied);
+        EventBus.Subscribe<ShadowInventoryChangedEvent>(OnShadowInventoryChanged);
+        RefreshFromSystem();
     }
 
     private void OnDisable()
     {
         EventBus.Unsubscribe<ShadowSummonedEvent>(OnShadowSummoned);
         EventBus.Unsubscribe<ShadowDiedEvent>(OnShadowDied);
+        EventBus.Unsubscribe<ShadowInventoryChangedEvent>(OnShadowInventoryChanged);
     }
 
     private void OnShadowSummoned(ShadowSummonedEvent summonedEvent)
@@ -42,7 +53,9 @@ public class ShadowArmyHUD : MonoBehaviour
 
         Image icon = CreateIcon();
         iconsByShadow[summonedEvent.soldier] = icon;
+        activeShadows = iconsByShadow.Count;
         RefreshLayout();
+        RefreshStatusText();
     }
 
     private void OnShadowDied(ShadowDiedEvent diedEvent)
@@ -59,7 +72,23 @@ public class ShadowArmyHUD : MonoBehaviour
         }
 
         iconsByShadow.Remove(diedEvent.soldier);
+        activeShadows = Mathf.Max(0, activeShadows - 1);
+        RefreshStatusText();
         StartCoroutine(RemoveIconRoutine(icon));
+    }
+
+    private void OnShadowInventoryChanged(ShadowInventoryChangedEvent inventoryEvent)
+    {
+        if (inventoryEvent == null)
+        {
+            return;
+        }
+
+        EnsureUi();
+        storedSouls = inventoryEvent.storedSouls;
+        activeShadows = inventoryEvent.activeShadows;
+        maxActiveShadows = inventoryEvent.maxActiveShadows;
+        RefreshStatusText();
     }
 
     private Image CreateIcon()
@@ -121,11 +150,13 @@ public class ShadowArmyHUD : MonoBehaviour
 
     private void EnsureUi()
     {
-        if (overlayCanvas != null && container != null)
+        if (overlayCanvas != null && container != null && statusRoot != null && storedCountText != null && activeCountText != null && summonHintText != null)
         {
+            RefreshStatusText();
             return;
         }
 
+        uiFont = uiFont != null ? uiFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         Canvas hostCanvas = FindOverlayCanvas();
         Transform overlay = hostCanvas.transform.Find("ShadowArmyOverlay");
         if (overlay == null)
@@ -163,6 +194,110 @@ public class ShadowArmyHUD : MonoBehaviour
         container.pivot = new Vector2(1f, 0f);
         container.anchoredPosition = new Vector2(-18f, 20f);
         container.sizeDelta = new Vector2(220f, 18f);
+
+        Transform statusTransform = overlay.Find("SoulInventoryStatus");
+        if (statusTransform == null)
+        {
+            GameObject statusObject = new GameObject("SoulInventoryStatus", typeof(RectTransform), typeof(Image), typeof(Outline));
+            statusTransform = statusObject.transform;
+            statusTransform.SetParent(overlay, false);
+        }
+
+        statusRoot = statusTransform as RectTransform;
+        statusRoot.anchorMin = new Vector2(1f, 0f);
+        statusRoot.anchorMax = new Vector2(1f, 0f);
+        statusRoot.pivot = new Vector2(1f, 0f);
+        statusRoot.anchoredPosition = new Vector2(-18f, 42f);
+        statusRoot.sizeDelta = new Vector2(238f, 48f);
+
+        Image statusImage = statusRoot.GetComponent<Image>();
+        if (statusImage == null)
+        {
+            statusImage = statusRoot.gameObject.AddComponent<Image>();
+        }
+        statusImage.sprite = HUDSpriteFactory.WhiteSprite;
+        statusImage.color = new Color(0.008f, 0.018f, 0.026f, 0.82f);
+        statusImage.raycastTarget = false;
+
+        Outline outline = statusRoot.GetComponent<Outline>();
+        if (outline == null)
+        {
+            outline = statusRoot.gameObject.AddComponent<Outline>();
+        }
+        outline.effectColor = new Color(0f, 0.9f, 1f, 0.62f);
+        outline.effectDistance = new Vector2(1f, -1f);
+
+        storedCountText = EnsureText(statusRoot, "StoredSouls", 15, TextAnchor.MiddleLeft, new Color(0.62f, 1f, 0.95f, 1f), new Vector2(12f, 24f), new Vector2(112f, 18f));
+        activeCountText = EnsureText(statusRoot, "ActiveShadows", 15, TextAnchor.MiddleLeft, Color.white, new Vector2(12f, 8f), new Vector2(112f, 18f));
+        summonHintText = EnsureText(statusRoot, "SummonHint", 13, TextAnchor.MiddleRight, new Color(1f, 0.88f, 0.34f, 1f), new Vector2(126f, 15f), new Vector2(96f, 20f));
+        summonHintText.text = "[R] INVOCAR";
+        RefreshStatusText();
+    }
+
+    private void RefreshFromSystem()
+    {
+        ShadowExtractionSystem extractionSystem = FindFirstObjectByType<ShadowExtractionSystem>();
+        if (extractionSystem == null)
+        {
+            RefreshStatusText();
+            return;
+        }
+
+        storedSouls = extractionSystem.StoredSoulCount;
+        activeShadows = extractionSystem.ActiveShadowCount;
+        maxActiveShadows = extractionSystem.MaxShadows;
+        RefreshStatusText();
+    }
+
+    private void RefreshStatusText()
+    {
+        if (storedCountText != null)
+        {
+            storedCountText.text = "ALMAS " + storedSouls;
+        }
+
+        if (activeCountText != null)
+        {
+            activeCountText.text = "SUBDITOS " + activeShadows + "/" + Mathf.Max(1, maxActiveShadows);
+        }
+
+        if (summonHintText != null)
+        {
+            summonHintText.color = storedSouls > 0 ? new Color(1f, 0.88f, 0.34f, 1f) : new Color(0.55f, 0.6f, 0.66f, 0.72f);
+        }
+    }
+
+    private Text EnsureText(Transform parent, string name, int fontSize, TextAnchor alignment, Color color, Vector2 anchoredPosition, Vector2 sizeDelta)
+    {
+        Transform target = parent.Find(name);
+        if (target == null)
+        {
+            GameObject textObject = new GameObject(name, typeof(RectTransform), typeof(Text), typeof(Outline));
+            target = textObject.transform;
+            target.SetParent(parent, false);
+        }
+
+        Text text = target.GetComponent<Text>();
+        RectTransform rect = text.rectTransform;
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(0f, 0f);
+        rect.pivot = new Vector2(0f, 0f);
+        rect.anchoredPosition = anchoredPosition;
+        rect.sizeDelta = sizeDelta;
+        text.font = uiFont;
+        text.fontSize = fontSize;
+        text.alignment = alignment;
+        text.color = color;
+        text.raycastTarget = false;
+
+        Outline outline = text.GetComponent<Outline>();
+        if (outline == null)
+        {
+            outline = text.gameObject.AddComponent<Outline>();
+        }
+        outline.effectColor = new Color(0f, 0f, 0f, 0.86f);
+        outline.effectDistance = new Vector2(1f, -1f);
+        return text;
     }
 
     private Canvas FindOverlayCanvas()
