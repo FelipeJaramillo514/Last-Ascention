@@ -575,7 +575,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected void PlayAnimation(string stateName)
     {
-        if (animator == null || string.IsNullOrEmpty(stateName))
+        if (animator == null || animator.runtimeAnimatorController == null || string.IsNullOrEmpty(stateName))
         {
             return;
         }

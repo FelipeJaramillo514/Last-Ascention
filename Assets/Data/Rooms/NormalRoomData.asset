@@ -24,6 +24,10 @@ MonoBehaviour:
     minCount: 0
     maxCount: 1
     weight: 0.35
+  - data: {fileID: 11400000, guid: fef56a72504f440f8ecfc1f61c3f4077, type: 2}
+    minCount: 0
+    maxCount: 1
+    weight: 0.28
   canHaveAmbush: 1
   possiblePropPrefabs:
   - {fileID: 6411983011043908742, guid: 4523a064045b88d44927b04b43e74ddc, type: 3}

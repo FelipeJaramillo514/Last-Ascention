@@ -10,6 +10,9 @@ using UnityEngine.UI;
 public class MainMenuController : MonoBehaviour
 {
     private const string HubSceneName = "CityArken";
+    private const string MenuBackgroundResourcePath = "Menu/MenuBackground";
+    private const string TitleLogoResourcePath = "Menu/LastAscentionTitle";
+    private const float MenuBackgroundPixelsPerUnit = 76.8f;
 
     [SerializeField] private Camera menuCamera;
     [SerializeField] private Transform backgroundRoot;
@@ -19,6 +22,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private Image vignetteImage;
     [SerializeField] private Image panelBackgroundImage;
     [SerializeField] private RectTransform titlePanel;
+    [SerializeField] private Image titleLogoImage;
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI subtitleText;
     [SerializeField] private RectTransform scanlineRect;
@@ -46,14 +50,19 @@ public class MainMenuController : MonoBehaviour
 
     private SaveData loadedSave;
     private bool hasSave;
+    private bool usingMenuBackgroundSprite;
+    private bool titleUsesLogoSprite;
     private float skyOffset;
     private float skylineOffset;
     private Vector2 titleTargetPosition;
+    private Vector2 titleLogoTargetPosition;
     private AudioClip hoverClip;
     private AudioClip clickClip;
     private MainMenuButtonFeedback lastHighlightedButton;
     private Sprite cachedWhiteSprite;
     private Sprite cachedMenuBackdropSprite;
+    private Sprite cachedMenuBackgroundSprite;
+    private Sprite cachedTitleLogoSprite;
     private static Material sharedMenuParticleMaterial;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -295,10 +304,13 @@ public class MainMenuController : MonoBehaviour
             menuCamera.backgroundColor = new Color32(7, 8, 16, 255);
         }
 
+        Sprite menuBackgroundSprite = LoadMenuBackgroundSprite();
         if (panelBackgroundImage != null)
         {
-            panelBackgroundImage.sprite = CreateMenuBackdropSprite();
+            panelBackgroundImage.sprite = menuBackgroundSprite != null ? menuBackgroundSprite : CreateMenuBackdropSprite();
             panelBackgroundImage.color = Color.white;
+            panelBackgroundImage.type = Image.Type.Simple;
+            panelBackgroundImage.preserveAspect = false;
             panelBackgroundImage.raycastTarget = false;
         }
 
@@ -321,16 +333,45 @@ public class MainMenuController : MonoBehaviour
             }
         }
 
-        if (skyRenderer != null && skyRenderer.sprite == null)
+        Sprite menuBackgroundSprite = LoadMenuBackgroundSprite();
+        usingMenuBackgroundSprite = menuBackgroundSprite != null;
+
+        if (skyRenderer != null && usingMenuBackgroundSprite)
+        {
+            skyRenderer.sprite = menuBackgroundSprite;
+            skyRenderer.color = Color.white;
+            skyRenderer.transform.localPosition = Vector3.zero;
+            skyRenderer.transform.localScale = Vector3.one;
+            skyRenderer.sortingLayerName = "Background";
+            skyRenderer.sortingOrder = -10;
+        }
+        else if (skyRenderer != null && skyRenderer.sprite == null)
         {
             skyRenderer.sprite = CreateSkySprite();
             skyRenderer.color = Color.white;
         }
 
-        if (skylineRenderer != null && skylineRenderer.sprite == null)
+        if (skylineRenderer != null && usingMenuBackgroundSprite)
+        {
+            skylineRenderer.gameObject.SetActive(false);
+        }
+        else if (skylineRenderer != null && skylineRenderer.sprite == null)
         {
             skylineRenderer.sprite = CreateSkylineSprite();
             skylineRenderer.color = Color.white;
+        }
+
+        if (usingMenuBackgroundSprite)
+        {
+            for (int i = 0; i < crackRenderers.Count; i++)
+            {
+                if (crackRenderers[i] != null)
+                {
+                    crackRenderers[i].gameObject.SetActive(false);
+                }
+            }
+
+            crackRenderers.Clear();
         }
 
         for (int i = 0; i < crackRenderers.Count; i++)
@@ -388,16 +429,35 @@ public class MainMenuController : MonoBehaviour
     private void ConfigureTextStyling()
     {
         TMP_FontAsset fontAsset = TMP_Settings.defaultFontAsset;
+        Image logoImage = EnsureTitleLogoImage();
+        Sprite titleLogoSprite = LoadTitleLogoSprite();
+        titleUsesLogoSprite = logoImage != null && titleLogoSprite != null;
+        if (titleUsesLogoSprite)
+        {
+            logoImage.sprite = titleLogoSprite;
+            logoImage.preserveAspect = true;
+            logoImage.raycastTarget = false;
+            logoImage.enabled = true;
+            titleLogoTargetPosition = logoImage.rectTransform.anchoredPosition;
+            logoImage.rectTransform.anchoredPosition = titleLogoTargetPosition + Vector2.up * 30f;
+            SetGraphicAlpha(logoImage, 0f);
+        }
+        else if (logoImage != null)
+        {
+            logoImage.enabled = false;
+        }
+
         if (titleText != null)
         {
+            titleText.gameObject.SetActive(!titleUsesLogoSprite);
             titleText.font = fontAsset;
-            titleText.text = "LAST ASCENSION";
+            titleText.text = "LAST ASCENTION";
             titleText.fontSize = 76f;
             titleText.color = new Color(1f, 0.94f, 0.76f, 1f);
             titleTargetPosition = titleText.rectTransform.anchoredPosition;
             titleText.rectTransform.anchoredPosition = titleTargetPosition + Vector2.up * 30f;
             titleText.alignment = TextAlignmentOptions.Left;
-            SetTextAlpha(titleText, 0f);
+            SetTextAlpha(titleText, titleUsesLogoSprite ? 1f : 0f);
             ApplyOutline(titleText, new Color32(255, 126, 30, 255), 0.23f);
         }
 
@@ -426,7 +486,14 @@ public class MainMenuController : MonoBehaviour
 
         if (titlePanel != null)
         {
-            SetRectTransform(titlePanel, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(56f, -58f), new Vector2(760f, 210f));
+            SetRectTransform(titlePanel, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(56f, -48f), new Vector2(780f, 240f));
+        }
+
+        if (titleLogoImage != null)
+        {
+            SetRectTransform(titleLogoImage.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 52f), new Vector2(740f, 190f));
+            titleLogoImage.preserveAspect = true;
+            titleLogoTargetPosition = titleLogoImage.rectTransform.anchoredPosition;
         }
 
         if (titleText != null)
@@ -439,14 +506,14 @@ public class MainMenuController : MonoBehaviour
 
         if (subtitleText != null)
         {
-            SetRectTransform(subtitleText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(4f, -42f), new Vector2(690f, 30f));
+            SetRectTransform(subtitleText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(4f, -72f), new Vector2(690f, 30f));
             subtitleText.alignment = TextAlignmentOptions.Left;
             subtitleText.fontSize = 17f;
         }
 
         if (scanlineRect != null)
         {
-            SetRectTransform(scanlineRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, -78f), new Vector2(700f, 3f));
+            SetRectTransform(scanlineRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, -106f), new Vector2(700f, 3f));
         }
 
         if (buttonsPanel != null)
@@ -689,7 +756,10 @@ public class MainMenuController : MonoBehaviour
 
     private IEnumerator PlayTitleIntro()
     {
-        if (titleText == null)
+        Graphic titleGraphic = titleUsesLogoSprite ? titleLogoImage : titleText;
+        RectTransform titleRect = titleGraphic != null ? titleGraphic.rectTransform : null;
+        Vector2 targetPosition = titleUsesLogoSprite ? titleLogoTargetPosition : titleTargetPosition;
+        if (titleGraphic == null || titleRect == null)
         {
             yield break;
         }
@@ -700,20 +770,30 @@ public class MainMenuController : MonoBehaviour
             elapsed += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01(elapsed / 1.2f);
             float eased = 1f - Mathf.Pow(1f - t, 3f);
-            titleText.rectTransform.anchoredPosition = Vector2.Lerp(titleTargetPosition + Vector2.up * 30f, titleTargetPosition, eased);
-            SetTextAlpha(titleText, eased);
+            titleRect.anchoredPosition = Vector2.Lerp(targetPosition + Vector2.up * 30f, targetPosition, eased);
+            SetGraphicAlpha(titleGraphic, eased);
             yield return null;
         }
 
-        titleText.rectTransform.anchoredPosition = titleTargetPosition;
-        SetTextAlpha(titleText, 1f);
+        titleRect.anchoredPosition = targetPosition;
+        SetGraphicAlpha(titleGraphic, 1f);
     }
 
     private IEnumerator SubtitleTypewriterRoutine()
     {
-        while (titleText != null && titleText.color.a < 0.99f)
+        if (titleUsesLogoSprite)
         {
-            yield return null;
+            while (titleLogoImage != null && titleLogoImage.color.a < 0.99f)
+            {
+                yield return null;
+            }
+        }
+        else
+        {
+            while (titleText != null && titleText.color.a < 0.99f)
+            {
+                yield return null;
+            }
         }
 
         if (subtitleText == null)
@@ -769,13 +849,13 @@ public class MainMenuController : MonoBehaviour
 
     private void AnimateParallax()
     {
-        if (skyRenderer != null)
+        if (skyRenderer != null && !usingMenuBackgroundSprite)
         {
             skyOffset += Time.unscaledDeltaTime * 0.02f;
             skyRenderer.transform.localPosition = new Vector3(Mathf.Repeat(skyOffset + 0.75f, 1.5f) - 0.75f, skyRenderer.transform.localPosition.y, skyRenderer.transform.localPosition.z);
         }
 
-        if (skylineRenderer != null)
+        if (skylineRenderer != null && skylineRenderer.gameObject.activeInHierarchy)
         {
             skylineOffset += Time.unscaledDeltaTime * 0.05f;
             skylineRenderer.transform.localPosition = new Vector3(Mathf.Repeat(skylineOffset + 0.75f, 1.5f) - 0.75f, skylineRenderer.transform.localPosition.y, skylineRenderer.transform.localPosition.z);
@@ -1082,6 +1162,11 @@ public class MainMenuController : MonoBehaviour
             titleText = FindSceneComponent<TextMeshProUGUI>("Canvas_MainMenu/Panel_Title/TitleText");
         }
 
+        if (titleLogoImage == null)
+        {
+            titleLogoImage = FindSceneComponent<Image>("Canvas_MainMenu/Panel_Title/TitleLogo");
+        }
+
         if (subtitleText == null)
         {
             subtitleText = FindSceneComponent<TextMeshProUGUI>("Canvas_MainMenu/Panel_Title/SubtitleText");
@@ -1209,6 +1294,61 @@ public class MainMenuController : MonoBehaviour
     {
         GameObject target = GameObject.Find(path);
         return target != null ? target.GetComponent<T>() : null;
+    }
+
+    private Image EnsureTitleLogoImage()
+    {
+        if (titleLogoImage != null || titlePanel == null)
+        {
+            return titleLogoImage;
+        }
+
+        Transform existing = titlePanel.Find("TitleLogo");
+        if (existing != null)
+        {
+            titleLogoImage = existing.GetComponent<Image>();
+        }
+
+        if (titleLogoImage == null)
+        {
+            GameObject titleLogoObject = new GameObject("TitleLogo", typeof(RectTransform), typeof(Image));
+            titleLogoObject.transform.SetParent(titlePanel, false);
+            titleLogoImage = titleLogoObject.GetComponent<Image>();
+        }
+
+        titleLogoImage.transform.SetAsFirstSibling();
+        titleLogoImage.raycastTarget = false;
+        return titleLogoImage;
+    }
+
+    private Sprite LoadMenuBackgroundSprite()
+    {
+        return LoadResourceSprite(MenuBackgroundResourcePath, MenuBackgroundPixelsPerUnit, ref cachedMenuBackgroundSprite);
+    }
+
+    private Sprite LoadTitleLogoSprite()
+    {
+        return LoadResourceSprite(TitleLogoResourcePath, 100f, ref cachedTitleLogoSprite);
+    }
+
+    private Sprite LoadResourceSprite(string resourcePath, float pixelsPerUnit, ref Sprite cache)
+    {
+        if (cache != null)
+        {
+            return cache;
+        }
+
+        Texture2D texture = Resources.Load<Texture2D>(resourcePath);
+        if (texture == null)
+        {
+            return null;
+        }
+
+        texture.filterMode = FilterMode.Bilinear;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        cache = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), Mathf.Max(1f, pixelsPerUnit));
+        cache.name = texture.name;
+        return cache;
     }
 
     private Sprite GetWhiteSprite()
@@ -1439,6 +1579,18 @@ public class MainMenuController : MonoBehaviour
         Color color = text.color;
         color.a = Mathf.Clamp01(alpha);
         text.color = color;
+    }
+
+    private void SetGraphicAlpha(Graphic graphic, float alpha)
+    {
+        if (graphic == null)
+        {
+            return;
+        }
+
+        Color color = graphic.color;
+        color.a = Mathf.Clamp01(alpha);
+        graphic.color = color;
     }
 
     private void ApplyOutline(TMP_Text text, Color outlineColor, float width)

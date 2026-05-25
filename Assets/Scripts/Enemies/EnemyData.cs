@@ -8,7 +8,8 @@ public enum EnemyType
     BeastMinor,
     StoneGiant,
     BodylessShadow,
-    StoneStatue
+    StoneStatue,
+    PutridAcolyte
 }
 
 public enum EnemyAttackType

@@ -439,14 +439,22 @@ public class DungeonRoom : MonoBehaviour
         for (int i = 0; i < spawnCount; i++)
         {
             EnemyData enemyData = enemiesToSpawn[i];
-            GameObject prefab = owner != null ? owner.ResolveEnemyPrefab(enemyData) : null;
-            if (prefab == null || enemyData == null)
+            if (enemyData == null)
             {
                 continue;
             }
 
             Transform spawnPoint = spawnPoints[i % spawnPoints.Count];
-            GameObject enemyObject = Instantiate(prefab, spawnPoint.position, Quaternion.identity, transform);
+            GameObject prefab = owner != null ? owner.ResolveEnemyPrefab(enemyData) : null;
+            GameObject enemyObject = prefab != null
+                ? Instantiate(prefab, spawnPoint.position, Quaternion.identity, transform)
+                : RuntimeEnemyFactory.CreateEnemy(enemyData, spawnPoint.position);
+            if (enemyObject == null)
+            {
+                continue;
+            }
+
+            enemyObject.transform.SetParent(transform, true);
             EnemyBase enemy = enemyObject.GetComponent<EnemyBase>();
             if (enemy != null)
             {
