@@ -42,16 +42,6 @@ public class SystemManager : MonoBehaviour
         ConfigureForCurrentStats(true);
     }
 
-    private void OnEnable()
-    {
-        EventBus.Subscribe<EnemyDiedEvent>(OnEnemyDied);
-    }
-
-    private void OnDisable()
-    {
-        EventBus.Unsubscribe<EnemyDiedEvent>(OnEnemyDied);
-    }
-
     public float GetPerceptionMultiplier()
     {
         return stats == null ? 1f : 1f + (stats.EffectivePerception * 0.005f);
@@ -133,16 +123,6 @@ public class SystemManager : MonoBehaviour
 
         stats.perception += amount;
         return "Percepcion";
-    }
-
-    private void OnEnemyDied(EnemyDiedEvent enemyDiedEvent)
-    {
-        if (stats == null || enemyDiedEvent == null)
-        {
-            return;
-        }
-
-        AddExperience(enemyDiedEvent.expValue * GetPerceptionMultiplier());
     }
 
     private void LevelUp()

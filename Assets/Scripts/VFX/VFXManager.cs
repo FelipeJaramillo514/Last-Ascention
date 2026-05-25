@@ -73,13 +73,12 @@ public class VFXManager : MonoBehaviour
 
     public void PlayEnemyDeath(Vector2 position, Color color, int expValue)
     {
+        _ = expValue;
         ParticleSystem burst = CreateOneShotBurst("EnemyDeathVFX", position, color, 20, 0.45f, 2.8f, 0.18f, ParticleSystemShapeType.Circle, 0.3f);
         if (burst != null)
         {
             Destroy(burst.gameObject, 1.25f);
         }
-
-        FloatingTextPopup.Spawn("+" + expValue + " EXP", new Color(0.45f, 0.85f, 1f, 1f), position + Vector2.up * 0.65f);
     }
 
     public void PlayLevelUp(Vector3 position)
